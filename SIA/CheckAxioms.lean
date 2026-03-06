@@ -9,6 +9,7 @@ import SIA.Continuity
 import SIA.Derivative
 import SIA.HigherOrder
 import SIA.Integration
+import SIA.FTC
 
 -- Spot-check key theorems: if any uses Classical.choice, the build will show it.
 -- Run `lake build` and inspect output: only `propext` and `Quot.sound` should appear.
@@ -45,3 +46,11 @@ import SIA.Integration
 #print axioms SIA.antideriv_sub
 #print axioms SIA.integral_additive
 #print axioms SIA.antideriv_slope_eq
+
+-- FTC
+#print axioms SIA.ftc1
+#print axioms SIA.ftc2
+#print axioms SIA.integral_well_defined
+#print axioms SIA.same_deriv_differ_by_const
+#print axioms SIA.eq_of_same_deriv_and_initial
+#print axioms SIA.integration_by_parts

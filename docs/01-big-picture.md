@@ -146,3 +146,4 @@ The rest of these articles walk through each file line by line:
 - **Article 9: CheckAxioms.lean** — Verifying we never used classical logic
 - **Article 10: HigherOrder.lean** — Higher-order infinitesimals and Delta_k
 - **Article 11: Integration.lean** — Integration and the Fundamental Theorem of Calculus
+- **Article 12: FTC.lean** — Clean FTC statements and corollaries (integration by parts, etc.)

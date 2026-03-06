@@ -838,3 +838,8 @@ do calculus --- are simpler, shorter, and more transparent than their
 classical counterparts. This is the promise of Smooth Infinitesimal Analysis:
 not that calculus becomes trivial, but that the distance between intuition and
 rigor becomes small enough to cross in a few lines of algebra.
+
+[Article 12](12-ftc.md) continues the story with `FTC.lean`, which gives
+clean, self-contained statements of both parts of the FTC and derives
+corollaries: the integral is well-defined, two functions with the same
+derivative differ by a constant, and integration by parts.

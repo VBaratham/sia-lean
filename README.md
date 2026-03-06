@@ -7,6 +7,12 @@ within intuitionistic logic — the Law of the Excluded Middle is not just avoid
 
 Based on J.L. Bell, *A Primer of Infinitesimal Analysis* (2nd ed., Cambridge, 2008).
 
+**Disclaimer**: All code in this project was written by Claude (Anthropic's AI assistant)
+and has not yet been verified by a human. While the code compiles and Lean's type checker
+accepts all proofs, this only guarantees logical validity relative to the stated axioms —
+it does not guarantee that the theorem *statements* accurately capture the intended
+mathematical claims.
+
 ## Documentation
 
 The [`docs/`](docs/) directory contains a series of articles explaining every line of
@@ -32,6 +38,9 @@ differentiable, and is fundamentally incompatible with classical logic.
 - **Every function is continuous**: all f : R → R preserve the neighbor relation
 - **Microaffinity**: every f : R → R has a unique derivative at every point
 - **Derivative rules**: sum, product, chain rule — all from microcancellation
+- **Higher-order infinitesimals**: Delta_k for nilpotent elements d^(k+1) = 0
+- **Integration**: antiderivative axiom, linearity, additivity
+- **Fundamental Theorem of Calculus**: both parts, plus integration by parts
 - **No classical axioms used**: verified by an automated compile-time checker
 
 ## Prerequisites
@@ -74,6 +83,9 @@ SIA/
 ├── Delta.lean          Nilsquare infinitesimal properties
 ├── Derivative.lean     Derivatives via microaffinity
 ├── Continuity.lean     All functions are continuous
+├── HigherOrder.lean    Higher-order infinitesimals (Delta_k)
+├── Integration.lean    Antiderivatives and integration
+├── FTC.lean            Fundamental Theorem of Calculus
 ├── CheckAxioms.lean    Compile-time classical axiom detector
 ```
 

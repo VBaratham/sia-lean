@@ -6,4 +6,5 @@ import SIA.Continuity
 import SIA.Derivative
 import SIA.HigherOrder
 import SIA.Integration
+import SIA.FTC
 import SIA.CheckAxioms
