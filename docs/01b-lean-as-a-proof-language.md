@@ -52,12 +52,31 @@ If Lean can type-check it, the theorem is proved. If not, you get a compile erro
 You can write proofs in Lean two ways:
 
 **1. Term-mode proofs** — you directly construct the proof object, much like writing a
-function:
+function. Here's a real example from our code:
 
-    theorem add_zero (a : R) : a + 0 = a := CommRing.add_zero a
+    theorem le_of_lt {a b : R} (h : a < b) : a ≤ b :=
+      fun hba => lt_irrefl a (lt_trans h hba)
 
-This says: "the proof that a + 0 = a is obtained by applying the axiom
-`CommRing.add_zero` to `a`." The result is a term of type `a + 0 = a`.
+The name `le_of_lt` reads as "less-or-equal from less-than" — a naming convention used
+throughout Lean: `conclusion_of_hypothesis`. We want to prove: if `a < b`, then `a ≤ b`. Since `a ≤ b` is *defined* as `¬(b < a)`,
+which in turn is defined as `(b < a) → False`, our goal is to build a function that
+takes a hypothetical proof of `b < a` and produces `False` (a contradiction).
+
+The proof `fun hba => lt_irrefl a (lt_trans h hba)` is exactly that function:
+
+- `fun hba =>` says "suppose we had a proof `hba` that `b < a`."
+- `lt_trans h hba` chains `h : a < b` with `hba : b < a` to get a proof of `a < a`.
+  (Here `lt_trans` is a function with type `a < b → b < c → a < c` — we apply it to
+  our two proofs and get a proof of `a < a`.)
+- `lt_irrefl a` is a proof that `¬(a < a)`, i.e., a function `(a < a) → False`.
+  Applying it to our proof of `a < a` produces `False`.
+
+The result is a term of type `(b < a) → False`, which is `¬(b < a)`, which is `a ≤ b`.
+Proof complete.
+
+This is the key mechanism: axioms and previously proved theorems are functions that
+produce proofs. You combine them — applying one result to another — to build proofs
+of new statements.
 
 **2. Tactic-mode proofs** — you use `by` to enter a step-by-step mode where Lean
 tracks a "goal" (what you still need to prove) and you chip away at it:
