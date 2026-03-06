@@ -7,6 +7,13 @@ within intuitionistic logic — the Law of the Excluded Middle is not just avoid
 
 Based on J.L. Bell, *A Primer of Infinitesimal Analysis* (2nd ed., Cambridge, 2008).
 
+## Documentation
+
+The [`docs/`](docs/) directory contains a series of articles explaining every line of
+code in this project. The articles are written for someone who knows traditional calculus
+but not Lean or formal algebra — they cover both the math and the Lean syntax from the
+ground up. Start with [Article 1: The Big Picture](docs/01-big-picture.md).
+
 ## What is SIA?
 
 In SIA, the number line R contains *nilsquare infinitesimals*: elements d where d*d = 0

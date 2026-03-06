@@ -67,7 +67,10 @@ are unavailable, and [Article 7](07-continuity.md) returns to this in full detai
 
 There's a price. In classical logic, for any proposition P, either P is true or P is
 false. This is called the **Law of the Excluded Middle** (LEM). Classical mathematics
-uses this everywhere, often without even noticing.
+uses this everywhere, often without even noticing. Among other things, LEM is what
+makes "proof by contradiction" work: to prove P, you assume not-P and derive a
+contradiction, concluding P must be true. That reasoning requires that P or not-P are
+the only two options.
 
 SIA is *incompatible* with LEM. Here's the intuitive reason: if you could decide, for
 every `d` in Delta, whether `d = 0` or `d != 0`, you could prove that Delta = {0}
@@ -132,6 +135,7 @@ This project formalizes SIA in Lean 4. We:
 
 The rest of these articles walk through each file line by line:
 
+- **Article 1b: Lean as a Proof Language** — Why propositions are types and proofs are programs
 - **Article 2: Algebra.lean** — Building a number system from scratch
 - **Article 3: Order.lean** — What does "less than" mean without LEM?
 - **Article 4: Field.lean** — Connecting order with arithmetic
