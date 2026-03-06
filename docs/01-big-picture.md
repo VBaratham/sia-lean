@@ -52,6 +52,17 @@ That's it. This single axiom gives you derivatives, makes every function smooth
 (infinitely differentiable), and makes every function continuous. No limits, no
 epsilons, no deltas.
 
+**"Every function is smooth" — really?** This is a natural point to object: surely
+you can define a step function like "f(x) = 1 if x > 0, else 0," and that's not
+smooth. The answer is that you *can't* define that function in SIA. A step function
+requires deciding, for every x, whether x > 0 or not. But an infinitesimal d is
+neither provably positive nor provably negative nor provably zero, so the step
+function has no well-defined value at d. The same applies to absolute value, max,
+min, and any other function defined by cases on such an undecidable property. SIA
+trades the ability to define such functions for a world where everything you *can*
+define is automatically smooth. (The next section explains *why* these case splits
+are unavailable, and [Article 7](07-continuity.md) returns to this in full detail.)
+
 ## The catch: no Law of the Excluded Middle
 
 There's a price. In classical logic, for any proposition P, either P is true or P is
@@ -62,6 +73,11 @@ SIA is *incompatible* with LEM. Here's the intuitive reason: if you could decide
 every `d` in Delta, whether `d = 0` or `d != 0`, you could prove that Delta = {0}
 (that the only nilsquare is zero itself). But the Kock-Lawvere axiom requires Delta to
 be bigger than {0}. So LEM must fail.
+
+This is exactly what makes the step function from the previous section impossible to
+define. LEM would let you case-split on "x > 0 or not" for every x — including
+infinitesimals. Without LEM, that case split is unavailable, and functions like the
+step function, absolute value, and max simply cannot be written down.
 
 We don't just avoid LEM as a matter of taste — we actually *prove* that it leads to a
 contradiction within SIA. This is one of the theorems in our code
