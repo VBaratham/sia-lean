@@ -89,7 +89,75 @@ SIA/
 ├── CheckAxioms.lean    Compile-time classical axiom detector
 ```
 
-See [PLAN.md](PLAN.md) for the full implementation plan and mathematical details.
+## How We Ensure No Classical Logic
+
+SIA is *incompatible* with classical logic — the Kock-Lawvere axiom and the Law of the
+Excluded Middle together lead to a contradiction. So avoiding classical reasoning is not
+a stylistic choice but a mathematical necessity. Our approach:
+
+1. **No Mathlib dependency.** Mathlib uses `Classical` pervasively. We build all
+   algebraic and order-theoretic infrastructure from scratch.
+
+2. **No `Classical.choice`.** Lean 4's core has three extra-logical axioms:
+   - `propext` (propositional extensionality) — constructively acceptable
+   - `Quot.sound` (quotient soundness) — constructively acceptable
+   - `Classical.choice` — this gives LEM; we never use it
+
+3. **No classical tactics.** We avoid `by_contra`, `Decidable.em`, `open Classical`,
+   and anything else that introduces classical reasoning.
+
+4. **Compile-time verification.** `SIA/CheckAxioms.lean` uses `#print axioms` on every
+   key theorem. If any depends on `Classical.choice`, the build output shows it
+   immediately. Only `propext` and `Quot.sound` appear.
+
+## Design Decisions
+
+**Apartness vs negated equality.** We use `a ≠ b → a < b ∨ b < a`, making `≠` and
+order-apartness equivalent. A more refined approach would separate these, but for SIA
+this is sufficient and matches Bell's presentation.
+
+**Field inverses.** Invertibility requires apartness from zero (`0 < a ∨ a < 0`), not
+mere `a ≠ 0`. Since these are equivalent in our system (via `ne_lt`), we use Lean's
+standard approach with `a ≠ 0 → a has inverse`.
+
+**No Mathlib.** We sacrifice tactics like `ring`, `linarith`, and `field_simp` for
+complete axiom control. Every algebraic lemma is proved by hand. This makes proofs
+longer but guarantees no classical logic sneaks in through library dependencies.
+
+**Conditional statements over witness extraction.** The Kock-Lawvere and integration
+axioms assert existence via `ExistsUnique`. Extracting the witness as a Lean function
+would require `Exists.choose`, which depends on `Classical.choice`. Instead, all
+theorems are stated conditionally: "if F is an antiderivative of f, then..." The axioms
+guarantee such witnesses exist (and are unique), so the theorems are not vacuously true.
+
+## Future Work
+
+The following extensions would build naturally on the current formalization:
+
+- **Generalized Kock-Lawvere axiom.** Every function `f : Delta_k k → R` is a polynomial
+  of degree ≤ k. The infrastructure (`Delta_k`, `npow`, `natCast`) is already in
+  `HigherOrder.lean`; what remains is stating the axiom (requiring a polynomial evaluation
+  function and factorial) and adding it as a class extending `SIAIntegral`.
+
+- **Taylor's theorem.** For `d ∈ Delta_k k`: `f(x+d) = f(x) + f'(x)*d + f''(x)*d²/2! + ...`
+  Follows from the generalized KL axiom applied to `g(d) = f(x+d)`. Requires iterated
+  derivatives and factorial, both of which need to be built from scratch.
+
+- **Inverse function theorem.** If f'(x) ≠ 0, then f is locally invertible and
+  `(f⁻¹)'(f(x)) = 1/f'(x)`. Requires field division (already axiomatized) applied to
+  derivatives.
+
+- **L'Hopital's rule.** Follows from the microaffinity representation: if f(x) = g(x) = 0
+  and g'(x) ≠ 0, then f(x+d)/g(x+d) = f'(x)/g'(x) for infinitesimal d, since the
+  higher-order terms vanish.
+
+- **Differential forms and the wedge product.** SIA provides a natural setting for
+  differential forms via the exterior algebra on infinitesimals. The nilsquare condition
+  `d² = 0` is precisely what makes `dx ∧ dx = 0` automatic.
+
+- **Intermediate Value Theorem (constructive version).** In SIA, IVT takes a weaker form
+  than in classical analysis — you cannot prove that a continuous function achieves every
+  intermediate value, but you can prove approximate versions.
 
 ## Legacy Code
 
