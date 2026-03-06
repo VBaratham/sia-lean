@@ -4,4 +4,6 @@ import SIA.Axioms
 import SIA.Delta
 import SIA.Continuity
 import SIA.Derivative
+import SIA.HigherOrder
+import SIA.Integration
 import SIA.CheckAxioms

@@ -81,5 +81,5 @@ See [PLAN.md](PLAN.md) for the full implementation plan and mathematical details
 
 ## Legacy Code
 
-The `src/` directory contains an earlier Lean 3 formalization that served as a
+The `archive/` directory contains an earlier Lean 3 formalization that served as a
 starting point for the mathematical development.

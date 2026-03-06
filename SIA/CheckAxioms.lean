@@ -7,6 +7,8 @@
 import SIA.Delta
 import SIA.Continuity
 import SIA.Derivative
+import SIA.HigherOrder
+import SIA.Integration
 
 -- Spot-check key theorems: if any uses Classical.choice, the build will show it.
 -- Run `lake build` and inspect output: only `propext` and `Quot.sound` should appear.
@@ -26,3 +28,20 @@ import SIA.Derivative
 #print axioms SIA.deriv_mul_eq
 #print axioms SIA.deriv_comp_eq
 #print axioms SIA.neighbors_not_transitive
+
+-- HigherOrder
+#print axioms SIA.delta_in_delta_k
+
+-- Integration
+#print axioms SIA.antideriv_unique
+#print axioms SIA.ftc_part2
+#print axioms SIA.shift_is_antideriv
+#print axioms SIA.ftc_part1
+#print axioms SIA.zero_slope_is_zero
+#print axioms SIA.zero_slope_is_const
+#print axioms SIA.antideriv_add
+#print axioms SIA.antideriv_const_mul
+#print axioms SIA.antideriv_neg
+#print axioms SIA.antideriv_sub
+#print axioms SIA.integral_additive
+#print axioms SIA.antideriv_slope_eq
