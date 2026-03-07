@@ -4,6 +4,22 @@ Article 1b introduced the core idea: propositions are types, proofs are terms.
 This article builds fluency through worked examples and exercises, starting
 simple and building up. Each example uses real code from the project.
 
+## Definitions you need to know
+
+Several symbols in our code are defined in terms of simpler concepts. Lean
+silently unfolds these definitions when type-checking proofs:
+
+| Expression | Definition | English |
+|-----------|------------|---------|
+| `¬P` | `P → False` | "P leads to a contradiction" |
+| `a ≠ b` | `(a = b) → False` | "a = b leads to a contradiction" |
+| `a ≤ b` | `¬(b < a)` | "b < a is impossible" |
+| `a - b` | `a + (-b)` | "a plus the negation of b" |
+
+These compose. For instance, `a ≤ b` unfolds to `¬(b < a)`, which unfolds to
+`(b < a) → False`. When you see a proof that starts with `fun h =>`, ask:
+"what type must `h` have?" The answer comes from unfolding the goal.
+
 ## Warm-up: reading theorem signatures
 
 Before reading proofs, practice reading *statements*. Every theorem in Lean
@@ -351,9 +367,10 @@ that takes a proof of `a = b` and produces `False`.
 
 - `fun hab =>` — assume `a = b` (Lean infers the type of `hab` as `a = b`,
   since that's what the unfolded goal requires)
-- `hab ▸ h` — the `▸` symbol means "substitute". `hab` is a proof that
-  `a = b`. We use it to substitute `b` with `a` in `h : a < b`, getting a
-  proof of `a < a`.
+- `hab ▸ h` — the `▸` symbol means "substitute". Given `hab : a = b`, the
+  `▸` replaces `b` with `a` (right-to-left). So it turns `h : a < b` into a
+  proof of `a < a`. (If you wanted the other direction — replacing `a` with
+  `b` — you'd write `hab.symm ▸ h`, where `.symm` flips `a = b` to `b = a`.)
 - `lt_irrefl a (...)` — a < a is impossible, so this produces `False`.
 
 ### Example 12: `le_of_lt` (revisited)
@@ -369,33 +386,46 @@ Lean unfolds `a ≤ b` to `¬(b < a)` to `(b < a) → False`.
 - `lt_trans h hba` — chain `h : a < b` and `hba : b < a` to get `a < a`
 - `lt_irrefl a (...)` — `a < a` is impossible, producing `False`
 
+### Example 13: `le_of_eq`
+
+```lean
+theorem le_of_eq {a b : R} (h : a = b) : a ≤ b :=
+  h ▸ le_refl a
+```
+
+We want to prove `a ≤ b` given `h : a = b`.
+
+- `le_refl a` is a proof that `a ≤ a` (Example 10).
+- `h ▸ le_refl a` — the `▸` substitutes using `h : a = b`, replacing `b` with
+  `a` in the *goal*. The goal `a ≤ b` becomes `a ≤ a`, which is exactly what
+  `le_refl a` proves.
+
+On paper: "Since a = b, it suffices to show a ≤ a, which is true by
+reflexivity."
+
 ### Exercise 5
 
 Read this proof and explain it:
 
 ```lean
-theorem two_ne_zero : (1 + 1 : R) ≠ 0 :=
-  lt_ne zero_lt_two
+theorem le_of_lt {a b : R} (h : a < b) : a ≤ b :=
+  fun hba => lt_irrefl a (lt_trans h hba)
 ```
 
-Hint: `zero_lt_two` is a proof that `0 < 1 + 1`. And `lt_ne` is Example 11
-above — it says `a < b → a ≠ b`.
+Hint: unfold `a ≤ b` using the definitions table at the top.
 
 <details>
 <summary>Answer</summary>
 
-`lt_ne zero_lt_two` applies the theorem "if a < b then a ≠ b" to the fact
-that 0 < 1 + 1, giving 0 ≠ 1 + 1.
+Lean unfolds `a ≤ b` to `¬(b < a)` to `(b < a) → False`. So we need a
+function that takes a proof of `b < a` and produces `False`.
 
-But wait — the conclusion is `(1 + 1) ≠ 0`, not `0 ≠ (1 + 1)`. In Lean, `≠`
-is symmetric by definition: `a ≠ b` means `(a = b) → False`, and since
-equality is symmetric, `(a = b) → False` and `(b = a) → False` are
-interconvertible. Lean handles this automatically.
+- `fun hba =>` — assume `b < a`
+- `lt_trans h hba` — chain `h : a < b` and `hba : b < a` to get `a < a`
+- `lt_irrefl a (...)` — `a < a` is impossible, producing `False`
 
-(Actually, `lt_ne` gives `0 ≠ 1 + 1` which is `(0 = 1 + 1) → False`. Lean
-can treat this as `(1 + 1 = 0) → False` since if `1 + 1 = 0` then `0 = 1 + 1`
-by symmetry. The details of how Lean resolves this are subtle, but the
-mathematical content is clear: 1 + 1 can't be zero because 0 < 1 + 1.)
+On paper: "Suppose for contradiction that b < a. Then by transitivity with
+a < b, we get a < a, contradicting irreflexivity."
 </details>
 
 ---
@@ -405,7 +435,7 @@ mathematical content is clear: 1 + 1 can't be zero because 0 < 1 + 1.)
 The `calc` tactic chains a sequence of equalities (or inequalities). Each
 line transforms one side using a justification.
 
-### Example 13: `neg_unique`
+### Example 14: `neg_unique`
 
 ```lean
 theorem neg_unique {a b : R} (h : a + b = 0) : b = -a := by
@@ -462,7 +492,7 @@ argument, written out in excruciating algebraic detail because we don't have
 a `ring` tactic.
 </details>
 
-### Example 14: `add_right_cancel` — combining everything
+### Example 15: `add_right_cancel` — combining everything
 
 ```lean
 theorem add_right_cancel {a b c : R} (h : a + c = b + c) : a = b := by
@@ -517,3 +547,26 @@ When you encounter a Lean proof you don't understand, here's a process:
    the types line up — each function receives arguments of the right type and
    produces output of the right type. When in doubt, ask: "What type does
    this expression have?"
+
+---
+
+## Quick reference: symbols
+
+| Symbol | Type | Meaning | Example |
+|--------|------|---------|---------|
+| `→` | `\to` or `\r` | implies / function type | `a < b → a ≤ b` |
+| `∀` | `\forall` | for all | `∀ (a : R), a + 0 = a` |
+| `∃` | `\exists` | there exists | `∃ x, x > 0` |
+| `∧` | `\and` | and | `0 ≤ d ∧ d ≤ 0` |
+| `∨` | `\or` | or | `a < b ∨ b < a` |
+| `¬` | `\neg` | not (`P → False`) | `¬(a < a)` |
+| `≠` | `\ne` | not equal (`(a = b) → False`) | `a ≠ 0` |
+| `≤` | `\le` | less or equal (`¬(b < a)`) | `a ≤ b` |
+| `▸` | `\t` | substitute an equality | `hab ▸ h` rewrites `h` using `hab` |
+| `⟨ ⟩` | `\langle` `\rangle` | build a pair or structure | `⟨proof_of_P, proof_of_Q⟩` |
+| `⁻¹` | `\inv` | inverse | `a⁻¹` |
+| `·` | `\cdot` | subgoal marker | used after `constructor` |
+| `←` | `\l` | rewrite backwards | `rw [← add_assoc]` |
+| `_` | | "the previous expression" | used in `calc` chains |
+| `:=` | | "here is the proof/definition" | |
+| `(x : T)` | | "`x` has type `T`" | `(a : R)`, `(h : a < b)` |
