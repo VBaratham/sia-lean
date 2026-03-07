@@ -529,9 +529,42 @@ Statement: if a + c = b + c, then a = b. (You can cancel from the right.)
 On paper: "Add -c to both sides: (a + c) + (-c) = (b + c) + (-c).
 Simplify both sides: a = b."
 
-The proof does in six rewrite steps what you'd do in one line on paper. This
-is the cost of working without a `ring` tactic — every algebraic simplification
-must be justified by name.
+The proof does in six rewrite steps what you'd do in one line on paper —
+every algebraic simplification must be justified by name.
+
+### Example 17: `lt_neg_flip` — combining everything
+
+```lean
+theorem lt_neg_flip {a b : R} (h : a < b) : -b < -a := by
+  have h1 : -b + a < -b + b := lt_add_left h (-b)
+  rw [neg_add] at h1
+  have h2 : (-b + a) + -a < 0 + -a := lt_add_right h1 (-a)
+  rw [zero_add, add_assoc, add_neg, add_zero] at h2
+  exact h2
+```
+
+Statement: if a < b, then -b < -a. (Negation flips the direction of an
+inequality.)
+
+This proof uses `have` with term-mode proofs, `rw` on hypotheses (not the
+goal), and `exact`. Let's trace through it:
+
+1. `have h1 : -b + a < -b + b := lt_add_left h (-b)` — the lemma
+   `lt_add_left` says: if a < b, then c + a < c + b. We apply it with
+   c = -b to get `h1 : -b + a < -b + b`. This is a term-mode proof on the
+   right side of `:=`.
+2. `rw [neg_add] at h1` — rewrite `h1` using `neg_add` (which says
+   -b + b = 0). Now `h1 : -b + a < 0`.
+3. `have h2 : ... := lt_add_right h1 (-a)` — `lt_add_right` says: if
+   x < y, then x + c < y + c. We add -a to both sides, getting
+   `h2 : (-b + a) + -a < 0 + -a`.
+4. `rw [zero_add, add_assoc, add_neg, add_zero] at h2` — four rewrites
+   simplify `h2`. The left side: `(-b + a) + -a = -b + (a + -a) = -b + 0 = -b`.
+   The right side: `0 + -a = -a`. So `h2` becomes `-b < -a`.
+5. `exact h2` — that's our goal. Done.
+
+On paper: "Add -b to both sides of a < b to get -b + a < 0. Add -a to both
+sides to get -b < -a."
 
 ---
 
