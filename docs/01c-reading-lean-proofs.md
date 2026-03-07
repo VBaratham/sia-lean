@@ -426,11 +426,22 @@ theorem neg_unique {a b : R} (h : a + b = 0) : b = -a := by
 
 Each `_` stands for "the previous expression." The chain reads:
 
-    b = 0 + b             (because 0 + b = b)
-      = ((-a) + a) + b    (because (-a) + a = 0, applied backwards)
+    b = 0 + b             (by zero_add)
+      = ((-a) + a) + b    (by neg_add, applied backwards)
       = (-a) + (a + b)    (by associativity)
-      = (-a) + 0          (because a + b = 0, which is our hypothesis h)
-      = -a                (because (-a) + 0 = -a)
+      = (-a) + 0          (by hypothesis h: a + b = 0)
+      = -a                (by add_zero)
+
+**A note on how `rw` works inside `calc`.** Reading the chain, it looks like
+each step transforms the LHS into the RHS — e.g., the first step rewrites `b`
+into `0 + b`. But the tactic mechanism works in the opposite direction. The
+goal for the first step is `b = 0 + b`, and `rw [zero_add]` rewrites
+left-to-right (`0 + a` → `a`), so it simplifies the *RHS* `0 + b` to `b`,
+giving `b = b`, which closes automatically. Similarly, the second step's goal
+is `0 + b = ((-a) + a) + b`, and `rw [neg_add]` rewrites `(-a) + a` → `0` on
+the RHS, giving `0 + b = 0 + b`. The calc block *presents* a chain building
+up from left to right, but each `rw` tactic *proves* the step by simplifying
+the right side to match the left.
 
 On paper you might write this as a single chain:
 "b = 0 + b = (-a + a) + b = -a + (a + b) = -a + 0 = -a."
