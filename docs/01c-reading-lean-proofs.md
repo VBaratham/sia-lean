@@ -477,11 +477,35 @@ The chain:
       = 0                  (anything times 0 is 0)
 
 Strategy: multiply both sides by c⁻¹. This is the standard "divide by c"
-argument, written out in excruciating algebraic detail because we don't have
-a `ring` tactic.
+argument, written out step by step.
 </details>
 
-### Example 15: `add_right_cancel` — combining everything
+### Example 15: calc steps without `rw`
+
+In this project, every calc step happens to use `rw`. But calc doesn't
+require this — each step just needs *some* proof that the equality holds.
+You can use `exact`, a term-mode expression, or any other tactic. For
+example, this proof from `Algebra.lean`:
+
+```lean
+theorem neg_mul_neg (a b : R) : (-a) * (-b) = a * b := by
+  calc (-a) * (-b) = -(a * (-b)) := by rw [← neg_mul_left]
+    _ = -(-(a * b)) := by rw [← neg_mul_right]
+    _ = a * b := by rw [neg_neg]
+```
+
+Every step uses `rw`, but the last step could equally be written as:
+
+```lean
+    _ = a * b := neg_neg (a * b)
+```
+
+Here `neg_neg (a * b)` is a term-mode proof — we directly apply the lemma
+`neg_neg : ∀ (a : R), -(-a) = a` to `a * b`, producing a proof that
+`-(-(a * b)) = a * b`. No `by` or `rw` needed. Calc doesn't care *how*
+you justify each step, only that the proof has the right type.
+
+### Example 16: `add_right_cancel` — combining everything
 
 ```lean
 theorem add_right_cancel {a b c : R} (h : a + c = b + c) : a = b := by
