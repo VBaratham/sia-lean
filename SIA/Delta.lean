@@ -87,7 +87,7 @@ theorem delta_nondegenerate : ¬ (∀ (x y : Delta R), x.val = y.val) := by
   have pf_one : ∀ (d : Delta R), f (0 + d.val) = f 0 + 1 * d.val := by
     intro d; simp [f, zero_add, one_mul]
   have h01 : (0 : R) = 1 := micro.unique pf_zero pf_one
-  exact absurd h01 (StrictOrder.lt_ne lt_zero_one)
+  exact absurd h01 (StrictOrder.lt_ne zero_lt_one)
 
 -- Delta elements are indistinguishable from zero (double negation)
 theorem delta_indistinguishable_zero (d : Delta R) : ¬¬ (d.val = 0) := by

@@ -10,7 +10,7 @@ import SIA.Order
 universe u
 
 class ConstructiveOrderedField (R : Type u) extends CField R, StrictOrder R where
-  lt_zero_one     : (0 : R) < 1
+  zero_lt_one     : (0 : R) < 1
   lt_add_left     : ∀ {a b : R}, a < b → ∀ (c : R), c + a < c + b
   lt_mul_pos_left : ∀ {a b c : R}, 0 < c → a < b → c * a < c * b
 
@@ -53,7 +53,7 @@ theorem neg_pos {a : R} (h : a < 0) : 0 < -a := by
   have := lt_neg_flip h; rw [neg_zero] at this; exact this
 
 theorem zero_lt_two : (0 : R) < 1 + 1 := by
-  have h1 : (0 : R) < 1 := lt_zero_one
+  have h1 : (0 : R) < 1 := zero_lt_one
   have h2 : 1 + (0 : R) < 1 + 1 := lt_add_left h1 1
   rw [add_zero] at h2
   exact lt_trans h1 h2
@@ -70,7 +70,7 @@ theorem one_div_pos_of_pos {c : R} (hc : 0 < c) : 0 < 1 / c := by
     (fun h => by
       have : c * c⁻¹ < c * 0 := lt_mul_pos_left hc h
       rw [CField.mul_inv c_ne, mul_zero] at this
-      exact absurd (lt_trans lt_zero_one this) (lt_irrefl 0))
+      exact absurd (lt_trans zero_lt_one this) (lt_irrefl 0))
     id
 
 theorem le_mul_pos_left {a b c : R} (hab : a ≤ b) (hc : 0 ≤ c) : c * a ≤ c * b := by

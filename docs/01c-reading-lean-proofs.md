@@ -226,18 +226,23 @@ intermediate facts (`have`) and then combine them.
 
 ```lean
 theorem zero_lt_two : (0 : R) < 1 + 1 := by
-  have h1 : (0 : R) < 1 := lt_zero_one
+  have h1 : (0 : R) < 1 := zero_lt_one
   have h2 : 1 + (0 : R) < 1 + 1 := lt_add_left h1 1
   rw [add_zero] at h2
   exact lt_trans h1 h2
 ```
+
+A note on syntax: `(0 : R)` means "the zero of type R." Lean has many types
+that each have their own zero (natural numbers, integers, etc.), so the `: R`
+tells Lean which one we mean. You'll see this annotation whenever Lean can't
+figure out the type on its own.
 
 We want to prove 0 < 1 + 1 (i.e., 0 < 2). There's no single lemma that
 gives this directly, so we build it in steps:
 
 1. `have h1 : (0 : R) < 1 := lt_zero_one` — "First, note that 0 < 1."
    The `have` tactic proves an intermediate fact and gives it a name (`h1`).
-   Here `lt_zero_one` is an axiom of our ordered field.
+   Here `zero_lt_one` is an axiom of our ordered field.
 2. `have h2 : 1 + 0 < 1 + 1 := lt_add_left h1 1` — "Since 0 < 1, adding 1
    to both sides gives 1 + 0 < 1 + 1." The lemma `lt_add_left` says you can
    add the same thing to both sides of an inequality.
