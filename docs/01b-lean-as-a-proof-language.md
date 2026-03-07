@@ -256,5 +256,9 @@ succeeded.
 | "P is true" | type `P` is inhabited | some term `t : P` exists |
 | "P is false" | type `P` is empty | no term of type `P` exists |
 
-With this understanding, you're ready to read the actual code. Article 2 starts with
-the algebraic foundations.
+If you'd like more practice reading Lean syntax before diving into the code,
+[Article 1c](01c-reading-lean-proofs.md) works through a series of examples and
+exercises using real proofs from this project.
+
+Otherwise, you're ready to read the actual code. Article 2 starts with the algebraic
+foundations.

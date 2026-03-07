@@ -136,6 +136,7 @@ This project formalizes SIA in Lean 4. We:
 The rest of these articles walk through each file line by line:
 
 - **Article 1b: Lean as a Proof Language** — Why propositions are types and proofs are programs
+- **Article 1c: Reading Lean Proofs** — Worked examples and exercises for reading proof syntax
 - **Article 2: Algebra.lean** — Building a number system from scratch
 - **Article 3: Order.lean** — What does "less than" mean without LEM?
 - **Article 4: Field.lean** — Connecting order with arithmetic
