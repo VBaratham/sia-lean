@@ -58,18 +58,37 @@ function. Here's a real example from our code:
       fun hba => lt_irrefl a (lt_trans h hba)
 
 The name `le_of_lt` reads as "less-or-equal from less-than" — a naming convention used
-throughout Lean: `conclusion_of_hypothesis`. We want to prove: if `a < b`, then `a ≤ b`. Since `a ≤ b` is *defined* as `¬(b < a)`,
-which in turn is defined as `(b < a) → False`, our goal is to build a function that
-takes a hypothetical proof of `b < a` and produces `False` (a contradiction).
+throughout Lean: `conclusion_of_hypothesis`. We want to prove: if `a < b`, then `a ≤ b`.
+
+But what does `a ≤ b` actually *mean* in Lean? It's defined in terms of simpler concepts:
+
+- `a ≤ b` is defined as `¬(b < a)` ("b is not less than a")
+- `¬(b < a)` is defined as `(b < a) → False` ("a proof of `b < a` would give a contradiction")
+
+So to prove `a ≤ b`, we need to build a function that takes a hypothetical proof of
+`b < a` and produces `False`. On paper, you'd write: "Suppose for contradiction that
+b < a. Then ... contradiction." In Lean, "suppose for contradiction" becomes `fun`,
+and the contradiction becomes the function body.
+
+(A note on terminology: this is *not* "proof by contradiction" in the classical sense.
+Classical proof by contradiction proves a positive statement P by assuming ¬P and
+deriving False, which requires LEM. Here we are proving a *negative* statement —
+`¬(b < a)` — by assuming `b < a` and deriving False. That is the *definition* of
+proving a negation, and it is constructively valid.)
 
 The proof `fun hba => lt_irrefl a (lt_trans h hba)` is exactly that function:
 
-- `fun hba =>` says "suppose we had a proof `hba` that `b < a`."
+- `fun hba =>` introduces a hypothetical proof that `b < a`. The name `hba` is
+  arbitrary — we could have called it `x` or `assumption`. Lean figures out that
+  `hba` has type `b < a` by unfolding the definitions above: we need to produce a
+  term of type `a ≤ b`, which is `¬(b < a)`, which is `(b < a) → False`, so the
+  input to `fun` must have type `b < a`. All of this unfolding happens silently
+  inside Lean's type checker.
 - `lt_trans h hba` chains `h : a < b` with `hba : b < a` to get a proof of `a < a`.
-  (Here `lt_trans` is a function with type `a < b → b < c → a < c` — we apply it to
-  our two proofs and get a proof of `a < a`.)
+  (Here `lt_trans` is a previously proved theorem with type `a < b → b < c → a < c` —
+  we apply it to our two proofs and get a proof of `a < a`.)
 - `lt_irrefl a` is a proof that `¬(a < a)`, i.e., a function `(a < a) → False`.
-  Applying it to our proof of `a < a` produces `False`.
+  Applying it to our proof of `a < a` produces `False`. This is the contradiction.
 
 The result is a term of type `(b < a) → False`, which is `¬(b < a)`, which is `a ≤ b`.
 Proof complete.

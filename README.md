@@ -23,8 +23,8 @@ ground up. Start with [Article 1: The Big Picture](docs/01-big-picture.md).
 ## What is SIA?
 
 In SIA, the number line R contains *nilsquare infinitesimals*: elements d where d*d = 0
-but d is not necessarily zero. The **Kock-Lawvere axiom** states that every function
-on these infinitesimals is affine:
+but d is not necessarily zero. The set of all such elements is called **Delta** (Δ).
+The **Kock-Lawvere axiom** states that every function on Delta is affine:
 
 > For every f : Delta -> R, there exists a unique b such that for all d in Delta,
 > f(d) = f(0) + b * d.
