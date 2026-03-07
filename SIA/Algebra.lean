@@ -12,26 +12,30 @@ class CommRing (R : Type u) extends Add R, Mul R, Neg R, Sub R, Zero R, One R wh
   add_assoc     : ∀ (a b c : R), (a + b) + c = a + (b + c)
   add_comm      : ∀ (a b : R), a + b = b + a
   add_zero      : ∀ (a : R), a + 0 = a
-  zero_add      : ∀ (a : R), 0 + a = a
   add_neg       : ∀ (a : R), a + (-a) = 0
-  neg_add       : ∀ (a : R), (-a) + a = 0
   sub_eq        : ∀ (a b : R), a - b = a + (-b)
   mul_assoc     : ∀ (a b c : R), (a * b) * c = a * (b * c)
   mul_comm      : ∀ (a b : R), a * b = b * a
   mul_one       : ∀ (a : R), a * 1 = a
-  one_mul       : ∀ (a : R), 1 * a = a
   mul_zero      : ∀ (a : R), a * 0 = 0
-  zero_mul      : ∀ (a : R), 0 * a = 0
   left_distrib  : ∀ (a b c : R), a * (b + c) = a * b + a * c
-  right_distrib : ∀ (a b c : R), (a + b) * c = a * c + b * c
   neg_neg       : ∀ (a : R), -(-a) = a
   neg_zero      : (-0 : R) = 0
   neg_mul_left  : ∀ (a b : R), -(a * b) = (-a) * b
-  neg_mul_right : ∀ (a b : R), -(a * b) = a * (-b)
 
 namespace CommRing
 
 variable {R : Type u} [CommRing R]
+
+-- Derived from axioms via commutativity
+theorem zero_add (a : R) : 0 + a = a := by rw [add_comm, add_zero]
+theorem neg_add (a : R) : (-a) + a = 0 := by rw [add_comm, add_neg]
+theorem one_mul (a : R) : 1 * a = a := by rw [mul_comm, mul_one]
+theorem zero_mul (a : R) : 0 * a = 0 := by rw [mul_comm, mul_zero]
+theorem right_distrib (a b c : R) : (a + b) * c = a * c + b * c := by
+  rw [mul_comm, left_distrib, mul_comm c a, mul_comm c b]
+theorem neg_mul_right (a b : R) : -(a * b) = a * (-b) := by
+  rw [mul_comm, neg_mul_left, mul_comm]
 
 -- Mark key lemmas for simp
 attribute [simp] add_zero zero_add add_neg neg_add mul_one one_mul mul_zero zero_mul
@@ -107,12 +111,14 @@ end CommRing
 class CField (R : Type u) extends CommRing R, Inv R, Div R where
   div_eq      : ∀ (a b : R), a / b = a * b⁻¹
   mul_inv     : ∀ {a : R}, a ≠ 0 → a * a⁻¹ = 1
-  inv_mul     : ∀ {a : R}, a ≠ 0 → a⁻¹ * a = 1
   inv_zero    : (0 : R)⁻¹ = 0
 
 namespace CField
 
 variable {R : Type u} [CField R]
+
+theorem inv_mul {a : R} (h : a ≠ 0) : a⁻¹ * a = 1 := by
+  rw [CommRing.mul_comm, mul_inv h]
 
 theorem inv_ne_zero {a : R} (h : a ≠ 0) : a⁻¹ ≠ 0 := by
   intro hinv
