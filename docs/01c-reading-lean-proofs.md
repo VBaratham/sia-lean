@@ -386,47 +386,25 @@ Lean unfolds `a ≤ b` to `¬(b < a)` to `(b < a) → False`.
 - `lt_trans h hba` — chain `h : a < b` and `hba : b < a` to get `a < a`
 - `lt_irrefl a (...)` — `a < a` is impossible, producing `False`
 
-### Example 13: `le_of_eq`
+### Example 13: `two_ne_zero`
 
 ```lean
-theorem le_of_eq {a b : R} (h : a = b) : a ≤ b :=
-  h ▸ le_refl a
+theorem two_ne_zero : (1 + 1 : R) ≠ 0 :=
+  Ne.symm (lt_ne zero_lt_two)
 ```
 
-We want to prove `a ≤ b` given `h : a = b`.
+We want to prove `(1 + 1) ≠ 0`. Working inside-out:
 
-- `le_refl a` is a proof that `a ≤ a` (Example 10).
-- `h ▸ le_refl a` — the `▸` substitutes using `h : a = b`, replacing `b` with
-  `a` in the *goal*. The goal `a ≤ b` becomes `a ≤ a`, which is exactly what
-  `le_refl a` proves.
-
-On paper: "Since a = b, it suffices to show a ≤ a, which is true by
-reflexivity."
-
-### Exercise 5
-
-Read this proof and explain it:
-
-```lean
-theorem le_of_lt {a b : R} (h : a < b) : a ≤ b :=
-  fun hba => lt_irrefl a (lt_trans h hba)
-```
-
-Hint: unfold `a ≤ b` using the definitions table at the top.
-
-<details>
-<summary>Answer</summary>
-
-Lean unfolds `a ≤ b` to `¬(b < a)` to `(b < a) → False`. So we need a
-function that takes a proof of `b < a` and produces `False`.
-
-- `fun hba =>` — assume `b < a`
-- `lt_trans h hba` — chain `h : a < b` and `hba : b < a` to get `a < a`
-- `lt_irrefl a (...)` — `a < a` is impossible, producing `False`
-
-On paper: "Suppose for contradiction that b < a. Then by transitivity with
-a < b, we get a < a, contradicting irreflexivity."
-</details>
+1. `zero_lt_two` is a proof that `0 < 1 + 1`.
+2. `lt_ne zero_lt_two` applies Example 11 ("if a < b then a ≠ b") to get
+   `0 ≠ 1 + 1`.
+3. But we need `(1 + 1) ≠ 0`, not `0 ≠ (1 + 1)`. These are *not* the same
+   type: `0 ≠ 1 + 1` unfolds to `(0 = 1 + 1) → False`, while `(1 + 1) ≠ 0`
+   unfolds to `(1 + 1 = 0) → False`. Lean does not silently convert between
+   them.
+4. `Ne.symm` flips `a ≠ b` to `b ≠ a`. Given a proof of `(a = b) → False`, it
+   produces `(b = a) → False` by using `Eq.symm` to convert between the two
+   equality directions. So `Ne.symm (lt_ne zero_lt_two)` has the type we need.
 
 ---
 
