@@ -112,21 +112,17 @@ acts like the negation of a, it must *be* the negation of a.)
 
 ### Exercise 3
 
-This one is harder. Read the signature:
+Read this signature:
 
 ```lean
-theorem le_le_eq_nn {a b : R} (hab : a ≤ b) (hba : b ≤ a) : ¬¬ (a = b)
+theorem neg_mul_neg (a b : R) : (-a) * (-b) = a * b
 ```
 
 <details>
 <summary>Answer</summary>
 
-"If a ≤ b and b ≤ a, then it is not not the case that a = b."
-
-Notice this does NOT say a = b. It says ¬¬(a = b) — we can't prove equality
-outright, only that it's impossible to *disprove* equality. This is one of
-the places where constructive logic differs from classical logic. Classically,
-¬¬P is the same as P. Constructively, ¬¬P is weaker.
+"For any a and b, (-a) * (-b) = a * b." (A negative times a negative is
+positive — or more precisely, the two negations cancel.)
 </details>
 
 ---
@@ -361,37 +357,33 @@ a `ring` tactic.
 More complex proofs introduce hypotheses (`intro`) and prove intermediate
 facts (`have`).
 
-### Example 11: `delta_indistinguishable_zero`
+### Example 11: `add_right_cancel`
 
 ```lean
-theorem delta_indistinguishable_zero (d : Delta R) : ¬¬ (d.val = 0) := by
-  intro h
-  have ⟨h_ge, h_le⟩ := delta_near_zero d
-  exact (StrictOrder.ne_lt h).elim (fun h_lt => h_ge h_lt) (fun h_gt => h_le h_gt)
+theorem add_right_cancel {a b c : R} (h : a + c = b + c) : a = b := by
+  have : (a + c) + -c = (b + c) + -c := by rw [h]
+  rw [add_assoc, add_neg, add_zero, add_assoc, add_neg, add_zero] at this
+  exact this
 ```
 
-Statement: for any d in Delta, ¬¬(d = 0) — it is impossible to prove d ≠ 0.
+Statement: if a + c = b + c, then a = b. (You can cancel from the right.)
 
-The goal `¬¬(d.val = 0)` unfolds to `¬(d.val = 0) → False`, which unfolds to
-`((d.val = 0) → False) → False`. So we need to assume `d.val ≠ 0` and derive
-a contradiction.
+- `have : (a + c) + -c = (b + c) + -c := by rw [h]` — "First, note that..."
+  We add `-c` to both sides of the hypothesis `h`. The `have` tactic proves
+  an intermediate fact. (When no name is given after `have`, Lean names it
+  `this`.)
+- `rw [...] at this` — the `at this` means we rewrite the intermediate fact,
+  not the goal. The six rewrites simplify both sides:
+  `(a + c) + -c = a + (c + -c) = a + 0 = a`, and similarly for the right side.
+  After rewriting, `this` becomes `a = b`.
+- `exact this` — the intermediate fact `this` is now exactly our goal. Done.
 
-- `intro h` — assume `h : d.val ≠ 0` (i.e., `h : (d.val = 0) → False`)
-- `have ⟨h_ge, h_le⟩ := delta_near_zero d` — the theorem `delta_near_zero`
-  says every element of Delta satisfies `0 ≤ d` and `d ≤ 0`. The angle
-  brackets `⟨h_ge, h_le⟩` destructure the "and" into its two parts:
-  `h_ge : 0 ≤ d.val` (meaning `¬(d.val < 0)`) and
-  `h_le : d.val ≤ 0` (meaning `¬(0 < d.val)`).
-- `StrictOrder.ne_lt h` — the axiom `ne_lt` says if `a ≠ b` then `a < b ∨ b < a`.
-  Applied to `h : d.val ≠ 0`, this gives `d.val < 0 ∨ 0 < d.val`.
-- `.elim (fun h_lt => h_ge h_lt) (fun h_gt => h_le h_gt)` — handle both
-  cases of the "or":
-  - If `d.val < 0`: but `h_ge` says `¬(d.val < 0)`. Contradiction.
-  - If `0 < d.val`: but `h_le` says `¬(0 < d.val)`. Contradiction.
+On paper: "Add -c to both sides: (a + c) + (-c) = (b + c) + (-c).
+Simplify both sides: a = b."
 
-On paper: "Suppose d ≠ 0. Since d is in Delta, we know 0 ≤ d and d ≤ 0.
-Since d ≠ 0, either d < 0 or 0 < d. But d < 0 contradicts 0 ≤ d, and
-0 < d contradicts d ≤ 0. Contradiction."
+The proof does in six rewrite steps what you'd do in one line on paper. This
+is the cost of working without a `ring` tactic — every algebraic simplification
+must be justified by name.
 
 ---
 
