@@ -163,6 +163,7 @@ Here are the tactics you'll see most often:
 | `calc` | Chain equalities step by step | "We compute: ... = ... = ..." |
 | `show` | Restate the goal (for clarity) | "It suffices to show..." |
 | `congr 1` | Reduce to showing subterms match | "The outer structure matches, so..." |
+| `simp [lemmas]` | Apply simplification rules automatically | "This simplifies to..." |
 
 ### Example 5: `sub_self`
 
@@ -328,6 +329,33 @@ pattern is:
 This pattern appears throughout the project whenever we need to prove two
 things at once.
 
+### Example 10: `simp`
+
+Here's a proof using `rw`:
+
+```lean
+theorem sub_zero (a : R) : a - 0 = a := by
+  rw [sub_eq, neg_zero, add_zero]
+```
+
+Three steps: expand subtraction (`a - 0` → `a + (-0)`), simplify `-0` to `0`,
+then drop `+ 0`. With `simp`, this becomes:
+
+```lean
+theorem sub_zero (a : R) : a - 0 = a := by
+  simp
+```
+
+Where `rw` applies one named lemma at a time, `simp` applies many at once.
+It knows about `sub_eq`, `neg_zero`, and `add_zero` because they are
+registered as `@[simp]` lemmas (via the `attribute [simp]` or `@[simp]`
+annotations in `Algebra.lean`). It figures out the right sequence of rewrites
+automatically.
+
+You can also give `simp` extra lemmas: `simp [foo, bar]` uses `foo` and `bar`
+in addition to the registered `@[simp]` lemmas. You'll see this in the project
+for routine cleanup that would take several `rw` steps to spell out.
+
 ---
 
 ## Reading term-mode proofs
@@ -336,7 +364,7 @@ Some proofs are written without `by`, as a single expression. These are
 **term-mode proofs**. They're more concise but can be harder to read because
 you have to work inside-out.
 
-### Example 10: `le_refl`
+### Example 11: `le_refl`
 
 ```lean
 theorem le_refl (a : R) : a ≤ a := lt_irrefl a
@@ -353,7 +381,7 @@ we need. Done.
 The key insight: the "proof" is just citing a fact that already has the right
 type. Lean does the definitional unfolding silently.
 
-### Example 11: `lt_ne`
+### Example 12: `lt_ne`
 
 ```lean
 theorem lt_ne {a b : R} (h : a < b) : a ≠ b :=
@@ -373,7 +401,7 @@ that takes a proof of `a = b` and produces `False`.
   `b` — you'd write `hab.symm ▸ h`, where `.symm` flips `a = b` to `b = a`.)
 - `lt_irrefl a (...)` — a < a is impossible, so this produces `False`.
 
-### Example 12: `le_of_lt` (revisited)
+### Example 13: `le_of_lt` (revisited)
 
 ```lean
 theorem le_of_lt {a b : R} (h : a < b) : a ≤ b :=
@@ -386,7 +414,7 @@ Lean unfolds `a ≤ b` to `¬(b < a)` to `(b < a) → False`.
 - `lt_trans h hba` — chain `h : a < b` and `hba : b < a` to get `a < a`
 - `lt_irrefl a (...)` — `a < a` is impossible, producing `False`
 
-### Example 13: `two_ne_zero`
+### Example 14: `two_ne_zero`
 
 ```lean
 theorem two_ne_zero : (1 + 1 : R) ≠ 0 :=
@@ -396,7 +424,7 @@ theorem two_ne_zero : (1 + 1 : R) ≠ 0 :=
 We want to prove `(1 + 1) ≠ 0`. Working inside-out:
 
 1. `zero_lt_two` is a proof that `0 < 1 + 1`.
-2. `lt_ne zero_lt_two` applies Example 11 ("if a < b then a ≠ b") to get
+2. `lt_ne zero_lt_two` applies Example 12 ("if a < b then a ≠ b") to get
    `0 ≠ 1 + 1`.
 3. But we need `(1 + 1) ≠ 0`, not `0 ≠ (1 + 1)`. These are *not* the same
    type: `0 ≠ 1 + 1` unfolds to `(0 = 1 + 1) → False`, while `(1 + 1) ≠ 0`
@@ -413,7 +441,7 @@ We want to prove `(1 + 1) ≠ 0`. Working inside-out:
 The `calc` tactic chains a sequence of equalities (or inequalities). Each
 line transforms one side using a justification.
 
-### Example 14: `neg_unique`
+### Example 15: `neg_unique`
 
 ```lean
 theorem neg_unique {a b : R} (h : a + b = 0) : b = -a := by
@@ -480,7 +508,7 @@ Strategy: multiply both sides by c⁻¹. This is the standard "divide by c"
 argument, written out step by step.
 </details>
 
-### Example 15: calc steps without `rw`
+### Example 16: calc steps without `rw`
 
 In this project, every calc step happens to use `rw`. But calc doesn't
 require this — each step just needs *some* proof that the equality holds.
@@ -505,7 +533,7 @@ Here `neg_neg (a * b)` is a term-mode proof — we directly apply the lemma
 `-(-(a * b)) = a * b`. No `by` or `rw` needed. Calc doesn't care *how*
 you justify each step, only that the proof has the right type.
 
-### Example 16: `add_right_cancel` — combining everything
+### Example 17: `add_right_cancel` — combining everything
 
 ```lean
 theorem add_right_cancel {a b c : R} (h : a + c = b + c) : a = b := by
@@ -532,7 +560,7 @@ Simplify both sides: a = b."
 The proof does in six rewrite steps what you'd do in one line on paper —
 every algebraic simplification must be justified by name.
 
-### Example 17: `lt_neg_flip` — combining everything
+### Example 18: `lt_neg_flip` — combining everything
 
 ```lean
 theorem lt_neg_flip {a b : R} (h : a < b) : -b < -a := by
