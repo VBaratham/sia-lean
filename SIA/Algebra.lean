@@ -17,23 +17,56 @@ class CommRing (R : Type u) extends Add R, Mul R, Neg R, Sub R, Zero R, One R wh
   mul_assoc     : ∀ (a b c : R), (a * b) * c = a * (b * c)
   mul_comm      : ∀ (a b : R), a * b = b * a
   mul_one       : ∀ (a : R), a * 1 = a
-  mul_zero      : ∀ (a : R), a * 0 = 0
   left_distrib  : ∀ (a b c : R), a * (b + c) = a * b + a * c
-  neg_neg       : ∀ (a : R), -(-a) = a
-  neg_zero      : (-0 : R) = 0
-  neg_mul_left  : ∀ (a b : R), -(a * b) = (-a) * b
 
 namespace CommRing
 
 variable {R : Type u} [CommRing R]
 
--- Derived from axioms via commutativity
+-- Derived via commutativity
 theorem zero_add (a : R) : 0 + a = a := by rw [add_comm, add_zero]
 theorem neg_add (a : R) : (-a) + a = 0 := by rw [add_comm, add_neg]
 theorem one_mul (a : R) : 1 * a = a := by rw [mul_comm, mul_one]
-theorem zero_mul (a : R) : 0 * a = 0 := by rw [mul_comm, mul_zero]
 theorem right_distrib (a b c : R) : (a + b) * c = a * c + b * c := by
   rw [mul_comm, left_distrib, mul_comm c a, mul_comm c b]
+
+-- Cancellation (needed to derive mul_zero)
+theorem neg_add_cancel_left (a b : R) : -a + (a + b) = b := by
+  rw [← add_assoc, neg_add, zero_add]
+
+theorem add_neg_cancel_left (a b : R) : a + (-a + b) = b := by
+  rw [← add_assoc, add_neg, zero_add]
+
+theorem add_left_cancel {a b c : R} (h : a + b = a + c) : b = c := by
+  have : -a + (a + b) = -a + (a + c) := by rw [h]
+  rw [neg_add_cancel_left, neg_add_cancel_left] at this
+  exact this
+
+-- Derived: mul_zero (a * 0 + a * 0 = a * (0 + 0) = a * 0 = a * 0 + 0, cancel)
+theorem mul_zero (a : R) : a * 0 = 0 :=
+  add_left_cancel (by rw [add_zero, ← left_distrib, add_zero] :
+    a * 0 + a * 0 = a * 0 + 0)
+
+theorem zero_mul (a : R) : 0 * a = 0 := by rw [mul_comm, mul_zero]
+
+-- Derived: neg_unique, neg_neg, neg_zero
+theorem neg_unique {a b : R} (h : a + b = 0) : b = -a := by
+  calc b = 0 + b := by rw [zero_add]
+    _ = ((-a) + a) + b := by rw [neg_add]
+    _ = (-a) + (a + b) := by rw [add_assoc]
+    _ = (-a) + 0 := by rw [h]
+    _ = -a := by rw [add_zero]
+
+theorem neg_neg (a : R) : -(-a) = a :=
+  (neg_unique (neg_add a)).symm
+
+theorem neg_zero : (-0 : R) = 0 :=
+  (neg_unique (add_zero 0)).symm
+
+-- Derived: neg_mul_left (a*b + (-a)*b = (a+(-a))*b = 0*b = 0)
+theorem neg_mul_left (a b : R) : -(a * b) = (-a) * b :=
+  (neg_unique (by rw [← right_distrib, add_neg, zero_mul])).symm
+
 theorem neg_mul_right (a b : R) : -(a * b) = a * (-b) := by
   rw [mul_comm, neg_mul_left, mul_comm]
 
@@ -44,19 +77,6 @@ attribute [simp] add_zero zero_add add_neg neg_add mul_one one_mul mul_zero zero
 -- Useful derived lemmas
 @[simp] theorem sub_self (a : R) : a - a = 0 := by
   rw [sub_eq, add_neg]
-
-theorem neg_add_cancel_left (a b : R) : -a + (a + b) = b := by
-  rw [← add_assoc, neg_add, zero_add]
-
-theorem add_neg_cancel_left (a b : R) : a + (-a + b) = b := by
-  rw [← add_assoc, add_neg, zero_add]
-
-theorem neg_unique {a b : R} (h : a + b = 0) : b = -a := by
-  calc b = 0 + b := by rw [zero_add]
-    _ = ((-a) + a) + b := by rw [neg_add]
-    _ = (-a) + (a + b) := by rw [add_assoc]
-    _ = (-a) + 0 := by rw [h]
-    _ = -a := by rw [add_zero]
 
 theorem neg_add_distrib (a b : R) : -(a + b) = -a + -b := by
   have h : (a + b) + (-a + -b) = 0 := by
@@ -80,11 +100,6 @@ theorem mul_sub (a b c : R) : a * (b - c) = a * b - a * c := by
 
 theorem sub_mul (a b c : R) : (a - b) * c = a * c - b * c := by
   rw [sub_eq, sub_eq, right_distrib, neg_mul_left]
-
-theorem add_left_cancel {a b c : R} (h : a + b = a + c) : b = c := by
-  have : -a + (a + b) = -a + (a + c) := by rw [h]
-  rw [neg_add_cancel_left, neg_add_cancel_left] at this
-  exact this
 
 theorem add_right_cancel {a b c : R} (h : a + c = b + c) : a = b := by
   have : (a + c) + -c = (b + c) + -c := by rw [h]

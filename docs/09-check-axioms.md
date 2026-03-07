@@ -147,13 +147,12 @@ access to every definition and theorem in the project.
 
 ```lean
 -- Spot-check key theorems: if any uses Classical.choice, the build will show it.
--- Run `lake build` and inspect output: only `propext` and `Quot.sound` should appear.
+-- Run `lake build` and inspect output: only `propext` should appear.
 ```
 
 The comment explains the intent. When you run `lake build` (Lean's build
 command), the `#print axioms` commands below produce output that you can
-inspect. The expectation is clear: only `propext` and `Quot.sound` should
-appear. If `Classical.choice` shows up for any theorem, something has gone
+inspect. The expectation is clear: only `propext` should appear. If `Classical.choice` shows up for any theorem, something has gone
 wrong.
 
 Now come the fifteen checks, one for each key theorem in the project:

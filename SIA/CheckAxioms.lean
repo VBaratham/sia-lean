@@ -12,7 +12,7 @@ import SIA.Integration
 import SIA.FTC
 
 -- Spot-check key theorems: if any uses Classical.choice, the build will show it.
--- Run `lake build` and inspect output: only `propext` and `Quot.sound` should appear.
+-- Run `lake build` and inspect output: only `propext` should appear.
 
 #print axioms SIA.not_lem_on_delta
 #print axioms SIA.delta_nondegenerate

@@ -70,7 +70,7 @@ also manually inspect individual theorems:
 
 ```lean
 #print axioms SIA.not_lem_on_delta
--- propext, Quot.sound  (no Classical.choice!)
+-- propext  (no Classical.choice!)
 ```
 
 ## Project Structure
@@ -108,7 +108,7 @@ a stylistic choice but a mathematical necessity. Our approach:
 
 4. **Compile-time verification.** `SIA/CheckAxioms.lean` uses `#print axioms` on every
    key theorem. If any depends on `Classical.choice`, the build output shows it
-   immediately. Only `propext` and `Quot.sound` appear.
+   immediately. Only `propext` appears.
 
 ## Design Decisions
 

@@ -586,8 +586,12 @@ When you encounter a Lean proof you don't understand, here's a process:
 4. **For term proofs**: read inside-out. The outermost function is the last
    step; the innermost expressions are the first steps.
 
-5. **Ignore names.** `h`, `hba`, `hab`, `hF` are just variable names chosen
-   by the author. What matters is their *type*, which Lean infers.
+5. **Read names as hints.** Variable names are not meaningful to Lean — what
+   matters is their *type*. But authors follow conventions that help you read
+   proofs: `h` for a generic hypothesis, `hab` for a hypothesis about `a` and
+   `b`, `hc` for a hypothesis about `c`, `h_neg` or `h_pos` for sign
+   assumptions. Theorem names follow `conclusion_of_hypothesis` — e.g.,
+   `le_of_lt` means "≤ from <" and `lt_ne` means "< implies ≠".
 
 6. **Follow the types.** Every expression has a type. A proof works because
    the types line up — each function receives arguments of the right type and

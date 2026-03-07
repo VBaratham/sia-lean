@@ -33,6 +33,32 @@ a type with no terms (an "empty type"). Proving a theorem means constructing a t
 Lean's type checker accepts as inhabiting the theorem's type. If the code compiles, the
 proof is valid.
 
+### How can a type have no values?
+
+If you're coming from a programming background, this might seem strange. In most
+languages, every type you can write down has at least one value. But Lean's type system
+is more expressive — it supports **dependent types**, where a type can depend on a
+specific *value*, not just on other types.
+
+In most languages, types can depend on types: `List<Int>`, `Map<String, Bool>`. But the
+type can't refer to a specific runtime value. In Lean, it can. The type `a = b` depends
+on the specific values `a` and `b`. The type `Vector n` depends on the specific number
+`n`.
+
+This is where uninhabitable types come from naturally. In Lean, a type is defined by
+listing its **constructors** — the ways you can create a value. The equality type has
+one constructor, `rfl`, whose signature says: given any value `a`, produce a proof that
+`a = a`. Both sides of the equality must be the same. So `rfl` can produce a proof of
+`4 = 4` or `7 = 7`, but to produce a proof of `4 = 5`, you'd need a value that is
+simultaneously 4 and 5. No such value exists, so the constructor can't be called with
+valid inputs. The type `4 = 5` is empty — not because anyone declared it empty, but as
+a *consequence* of the definition.
+
+The simplest empty type is `False`, which is defined as an inductive type with zero
+constructors — there's simply no way to build a value of type `False`. This is what
+makes it work as logical falsehood: the type exists, but no term can ever be
+constructed.
+
 ## A concrete example
 
 Suppose we have a theorem statement:

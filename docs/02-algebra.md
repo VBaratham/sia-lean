@@ -65,22 +65,12 @@ class CommRing (R : Type u) extends Add R, Mul R, Neg R, Sub R, Zero R, One R wh
   add_assoc     : ∀ (a b c : R), (a + b) + c = a + (b + c)
   add_comm      : ∀ (a b : R), a + b = b + a
   add_zero      : ∀ (a : R), a + 0 = a
-  zero_add      : ∀ (a : R), 0 + a = a
   add_neg       : ∀ (a : R), a + (-a) = 0
-  neg_add       : ∀ (a : R), (-a) + a = 0
   sub_eq        : ∀ (a b : R), a - b = a + (-b)
   mul_assoc     : ∀ (a b c : R), (a * b) * c = a * (b * c)
   mul_comm      : ∀ (a b : R), a * b = b * a
   mul_one       : ∀ (a : R), a * 1 = a
-  one_mul       : ∀ (a : R), 1 * a = a
-  mul_zero      : ∀ (a : R), a * 0 = 0
-  zero_mul      : ∀ (a : R), 0 * a = 0
   left_distrib  : ∀ (a b c : R), a * (b + c) = a * b + a * c
-  right_distrib : ∀ (a b c : R), (a + b) * c = a * c + b * c
-  neg_neg       : ∀ (a : R), -(-a) = a
-  neg_zero      : (-0 : R) = 0
-  neg_mul_left  : ∀ (a b : R), -(a * b) = (-a) * b
-  neg_mul_right : ∀ (a b : R), -(a * b) = a * (-b)
 ```
 
 There is a lot going on here. Let's take it piece by piece.
@@ -145,9 +135,7 @@ Now the axioms themselves. If you have taken any algebra course, these will be f
 - `add_assoc`: `(a + b) + c = a + (b + c)` — Parentheses don't matter for addition.
 - `add_comm`: `a + b = b + a` — Order doesn't matter for addition.
 - `add_zero`: `a + 0 = a` — Zero is a right identity.
-- `zero_add`: `0 + a = a` — Zero is a left identity.
 - `add_neg`: `a + (-a) = 0` — Every element has a right additive inverse.
-- `neg_add`: `(-a) + a = 0` — Every element has a left additive inverse.
 
 **Subtraction:**
 
@@ -160,52 +148,42 @@ Now the axioms themselves. If you have taken any algebra course, these will be f
 - `mul_comm`: `a * b = b * a` — Order doesn't matter for multiplication. (This is
   the "commutative" part of "commutative ring.")
 - `mul_one`: `a * 1 = a` — One is a right identity.
-- `one_mul`: `1 * a = a` — One is a left identity.
-- `mul_zero`: `a * 0 = 0` — Multiplying by zero gives zero (right).
-- `zero_mul`: `0 * a = 0` — Multiplying by zero gives zero (left).
 
 **Distributivity:**
 
 - `left_distrib`: `a * (b + c) = a * b + a * c` — Multiplication distributes over
   addition from the left.
-- `right_distrib`: `(a + b) * c = a * c + b * c` — Multiplication distributes from
-  the right.
 
-**Negation axioms:**
+### Why only 9 axioms?
 
-- `neg_neg`: `-(-a) = a` — Double negation cancels.
-- `neg_zero`: `-(0) = 0` — The negative of zero is zero.
-- `neg_mul_left`: `-(a * b) = (-a) * b` — You can "pull" a negative sign onto the
-  left factor.
-- `neg_mul_right`: `-(a * b) = a * (-b)` — You can "pull" a negative sign onto the
-  right factor.
+If you've seen commutative rings defined elsewhere, you might be used to seeing more
+axioms — left identity *and* right identity, left inverse *and* right inverse, and so
+on. We derive all of those as theorems from the 9 axioms above.
 
-### Why list so many "obvious" axioms?
+The key insight is **commutativity**. Since we have `add_comm` (a + b = b + a), we
+only need *one* of `add_zero`/`zero_add`, and the other follows:
 
-You might wonder: if we have `add_comm` (commutativity), can't we *derive* `zero_add`
-from `add_zero`? Yes! In classical algebra textbooks, you would. You would state
-`a + 0 = a` and then prove `0 + a = a` as a one-line consequence.
+```lean
+theorem zero_add (a : R) : 0 + a = a := by rw [add_comm, add_zero]
+```
 
-So why list both? Two reasons:
+The same applies to `neg_add` (from `add_neg`), `one_mul` (from `mul_one`),
+`right_distrib` (from `left_distrib`), and `neg_mul_right` (from `neg_mul_left`).
 
-1. **Convenience.** Every time we want to simplify `0 + a` to `a`, we would need a
-   two-step rewrite: first apply commutativity to get `a + 0`, then apply `add_zero`.
-   By making `zero_add` an axiom, we can do it in one step. In a large formalization,
-   these savings add up enormously.
+Even more interestingly, several properties that *look* like they should be axioms
+can be derived from the 9 above using algebraic reasoning:
 
-2. **Constructive caution.** In constructive mathematics, we are extra careful about
-   which direction a rewrite goes. Having both versions as axioms means we never need
-   to worry about whether we can derive one from the other — it is always available
-   directly.
+- **`mul_zero`** (`a * 0 = 0`): Since `a * 0 + a * 0 = a * (0 + 0) = a * 0`,
+  we can cancel to get `a * 0 = 0`.
+- **`neg_neg`** (`-(-a) = a`): Since `-a + a = 0`, uniqueness of inverses gives
+  `a = -(-a)`.
+- **`neg_zero`** (`-0 = 0`): Since `0 + 0 = 0`, uniqueness of inverses gives
+  `0 = -0`.
+- **`neg_mul_left`** (`-(a * b) = (-a) * b`): Since `a*b + (-a)*b = (a + (-a))*b
+  = 0*b = 0`, uniqueness of inverses gives `(-a)*b = -(a*b)`.
 
-The same reasoning applies to `mul_one`/`one_mul`, `mul_zero`/`zero_mul`,
-`add_neg`/`neg_add`, and so on. These pairs are "symmetric" versions of the same fact,
-and listing both saves work downstream.
-
-Similarly, `neg_neg`, `neg_zero`, `neg_mul_left`, and `neg_mul_right` could all be
-derived from the other axioms in a classical setting. By including them as axioms, we
-make the proofs that follow shorter and avoid relying on derivations that might
-implicitly use classical reasoning.
+All of these are proved as theorems in the file. The result is a minimal set of
+axioms — just the 9 that are truly independent.
 
 ## The CommRing namespace and derived lemmas
 
@@ -257,7 +235,7 @@ attribute [simp] add_zero zero_add add_neg neg_add mul_one one_mul mul_zero zero
                  neg_neg neg_zero
 ```
 
-This line registers a collection of axioms as **simplification lemmas**. The `simp`
+This line registers a collection of lemmas as **simplification lemmas**. The `simp`
 tactic in Lean is an automated simplifier — it repeatedly applies a set of rewrite
 rules to try to reduce an expression to a simpler form. By marking `add_zero` as a
 simp lemma, we are telling Lean: "Whenever you see `a + 0`, you can simplify it to
@@ -265,8 +243,9 @@ simp lemma, we are telling Lean: "Whenever you see `a + 0`, you can simplify it 
 
 The lemmas chosen here are all of the form "something complicated equals something
 simpler": `a + 0` simplifies to `a`, `a * 1` simplifies to `a`, `-(-a)` simplifies
-to `a`, and so on. These are exactly the kind of routine simplifications you would do
-without thinking on a whiteboard.
+to `a`, and so on. Some of these are axioms (`add_zero`, `add_neg`, `mul_one`) and
+some are derived theorems (`zero_add`, `neg_add`, `one_mul`, `mul_zero`, `zero_mul`,
+`neg_neg`, `neg_zero`), but Lean treats them identically once they are registered.
 
 ### Derived lemma: `sub_self`
 
@@ -275,7 +254,7 @@ without thinking on a whiteboard.
   rw [sub_eq, add_neg]
 ```
 
-This is our first **derived lemma** — a theorem proved from the axioms, rather than
+This is a **derived lemma** — a theorem proved from the axioms, rather than
 assumed. Let's read every part of this line.
 
 `@[simp]` is an **attribute annotation**. It does the same thing as the `attribute
@@ -525,7 +504,6 @@ With commutative rings in hand, we now define fields — rings where you can als
 class CField (R : Type u) extends CommRing R, Inv R, Div R where
   div_eq      : ∀ (a b : R), a / b = a * b⁻¹
   mul_inv     : ∀ {a : R}, a ≠ 0 → a * a⁻¹ = 1
-  inv_mul     : ∀ {a : R}, a ≠ 0 → a⁻¹ * a = 1
   inv_zero    : (0 : R)⁻¹ = 0
 ```
 
@@ -561,8 +539,8 @@ extends `CommRing` and adds axioms about inversion and division.
   The notation `a ≠ 0` in Lean is actually defined as `a = 0 → False`. That is,
   "`a ≠ 0` is not zero" means "assuming `a = 0` leads to a contradiction."
 
-- `inv_mul`: `a ≠ 0 → a⁻¹ * a = 1` — The same fact with the factors in the other
-  order. (As with `add_zero`/`zero_add`, both directions are included for convenience.)
+  As with the CommRing axioms, we only need one direction — `inv_mul` (the reverse
+  order, `a⁻¹ * a = 1`) is derived via commutativity.
 
 - `inv_zero`: `(0 : R)⁻¹ = 0` — The inverse of zero is defined to be zero.
 
@@ -690,14 +668,17 @@ end CField
 
 This file establishes two algebraic structures:
 
-1. **CommRing** — A commutative ring: a type with `+`, `*`, `-`, `0`, `1`, satisfying
-   20 axioms (associativity, commutativity, distributivity, etc.). From these axioms,
-   we derived 14 additional lemmas about subtraction, cancellation, negation, and
+1. **CommRing** — A commutative ring: a type with `+`, `*`, `-`, `0`, `1`, built from
+   just 9 axioms (associativity, commutativity, identity, inverse, distributivity, and
+   the definition of subtraction). From these axioms, we derived everything else:
+   commuted versions (`zero_add`, `one_mul`, etc.), `mul_zero`, `neg_neg`, `neg_zero`,
+   `neg_mul_left`, and many additional lemmas about cancellation, subtraction, and
    distribution.
 
 2. **CField** — A (constructive) field: a commutative ring with an additional inverse
-   operation `⁻¹` and division `/`, satisfying 4 more axioms. We derived 4 theorems
-   about inverse nonzero-ness and division cancellation.
+   operation `⁻¹` and division `/`, satisfying 3 more axioms. We derived `inv_mul`
+   (via commutativity) and theorems about inverse nonzero-ness and division
+   cancellation.
 
 None of this mentions infinitesimals, derivatives, or anything specific to SIA. This
 is pure algebraic infrastructure — the foundation that everything else builds on. In
