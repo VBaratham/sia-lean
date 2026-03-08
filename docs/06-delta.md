@@ -268,7 +268,7 @@ need the degeneracy assumption -- it is always true for the identity function.
 
 ```lean
   have h01 : (0 : R) = 1 := micro.unique pf_zero pf_one
-  exact absurd h01 (StrictOrder.lt_ne lt_zero_one)
+  exact absurd h01 (StrictOrder.lt_ne zero_lt_one)
 ```
 
 But microaffinity says the slope is *unique*. Both 0 and 1 are valid slopes, so

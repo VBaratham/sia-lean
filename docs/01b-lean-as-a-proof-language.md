@@ -45,7 +45,7 @@ This correspondence runs deep. Every logical concept has a programming counterpa
 | Modus ponens (applying an implication) | Function application | `h_impl h_proof` |
 | Conjunction `P ∧ Q` | Pair type `P × Q` | `⟨proof_p, proof_q⟩` |
 | Disjunction `P ∨ Q` | Sum type (either P or Q) | `Or.inl h` / `Or.inr h` |
-| Negation `¬P` | Function `P → False` | `fun (h : P) => ...` |
+| Negation `¬P` | Function `P → False` | just `P → False` (special case of implication) |
 | False | Empty type (no constructors) | `False` |
 | True | Unit type (trivial to construct) | `True` |
 | Universal `∀ x, P x` | Dependent function `(x : α) → P x` | `fun x => ...` |

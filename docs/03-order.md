@@ -274,7 +274,7 @@ reflects the genuine underdetermination of order among infinitesimals.
 
 ## What we've built
 
-This file establishes a strict order on our type R with three axioms
+This file defines a `StrictOrder` class for any type R, with three axioms
 (irreflexivity, transitivity, apartness) and derives from them:
 
 - A definition of `≤` as negated strict inequality

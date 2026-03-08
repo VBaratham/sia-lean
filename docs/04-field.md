@@ -47,7 +47,7 @@ our definitions work for any type, not just one fixed type.
 
 ```lean
 class ConstructiveOrderedField (R : Type u) extends CField R, StrictOrder R where
-  lt_zero_one     : (0 : R) < 1
+  zero_lt_one     : (0 : R) < 1
   lt_add_left     : ∀ {a b : R}, a < b → ∀ (c : R), c + a < c + b
   lt_mul_pos_left : ∀ {a b c : R}, 0 < c → a < b → c * a < c * b
 ```
@@ -66,10 +66,10 @@ means we don't have to repeat any of those axioms -- they come along for free.
 
 Then come three new axioms, the glue between arithmetic and ordering:
 
-### Axiom 1: `lt_zero_one`
+### Axiom 1: `zero_lt_one`
 
 ```lean
-lt_zero_one : (0 : R) < 1
+zero_lt_one : (0 : R) < 1
 ```
 
 Zero is strictly less than one. This may seem trivially obvious, but it's doing real
@@ -77,6 +77,12 @@ work. It rules out degenerate cases. In a ring where `0 = 1`, everything collaps
 every element equals zero (since `a = a * 1 = a * 0 = 0`). By demanding `0 < 1`, and
 since `<` is irreflexive (nothing is less than itself), we're guaranteeing `0 ≠ 1`,
 which keeps the field non-trivial.
+
+Bell puts this nontriviality axiom (`¬(0 = 1)`) on the field itself (his R₁,
+Chapter 8). We put it here on the ordered field instead, where it follows from
+`zero_lt_one` and irreflexivity of `<`. This means our `CField` class alone
+technically allows the degenerate case `0 = 1`, but that's ruled out as soon
+as we combine it with the order structure.
 
 The `(0 : R)` annotation tells Lean that these are the zero and one of `R`, not of
 natural numbers or some other type.
@@ -87,14 +93,11 @@ natural numbers or some other type.
 lt_add_left : ∀ {a b : R}, a < b → ∀ (c : R), c + a < c + b
 ```
 
-If `a < b`, then for any `c`, `c + a < c + b`. In other words, adding the same thing
-to both sides preserves strict inequality. The `c` goes on the left -- we'll derive the
-right-handed version (`a + c < b + c`) as the first theorem.
-
-Why is this the right axiom? Because ordering should be *translation-invariant*.
-Sliding the entire number line left or right shouldn't change which of two numbers is
-bigger. If I owe you 3 dollars and you owe me 5, and we both receive 100 dollars, you're
-still ahead.
+If `a < b`, then for any `c`, `c + a < c + b`. Adding the same thing to both sides
+preserves strict inequality. This needs to be an axiom because nothing in `StrictOrder`
+or `CField` alone connects `<` with `+` — they're independent structures until we
+explicitly tie them together. The `c` goes on the left; we'll derive the right-handed
+version (`a + c < b + c`) as the first theorem.
 
 ### Axiom 3: `lt_mul_pos_left`
 
@@ -282,7 +285,7 @@ Two quick corollaries of `lt_neg_flip`:
 
 ```lean
 theorem zero_lt_two : (0 : R) < 1 + 1 := by
-  have h1 : (0 : R) < 1 := lt_zero_one
+  have h1 : (0 : R) < 1 := zero_lt_one
   have h2 : 1 + (0 : R) < 1 + 1 := lt_add_left h1 1
   rw [add_zero] at h2
   exact lt_trans h1 h2
@@ -291,7 +294,7 @@ theorem zero_lt_two : (0 : R) < 1 + 1 := by
 We want `0 < 1 + 1`. We don't have a literal `2` -- in this formalization, two is
 represented as `1 + 1`. The proof chains two facts:
 
-1. **`h1 : 0 < 1`** -- This is our axiom `lt_zero_one`.
+1. **`h1 : 0 < 1`** -- This is our axiom `zero_lt_one`.
 2. **`h2 : 1 + 0 < 1 + 1`** -- Apply `lt_add_left` to `0 < 1` with `c = 1`. This
    gives `1 + 0 < 1 + 1`.
 3. **`rw [add_zero] at h2`** -- Simplify `1 + 0` to `1`. Now `h2 : 1 < 1 + 1`.
@@ -333,7 +336,7 @@ theorem one_div_pos_of_pos {c : R} (hc : 0 < c) : 0 < 1 / c := by
     (fun h => by
       have : c * c⁻¹ < c * 0 := lt_mul_pos_left hc h
       rw [CField.mul_inv c_ne, mul_zero] at this
-      exact absurd (lt_trans lt_zero_one this) (lt_irrefl 0))
+      exact absurd (lt_trans zero_lt_one this) (lt_irrefl 0))
     id
 ```
 
@@ -367,8 +370,8 @@ derive a contradiction:
   positive number `c` gives `c * c⁻¹ < c * 0`.
 - **`rw [CField.mul_inv c_ne, mul_zero] at this`** -- Simplify: `c * c⁻¹ = 1` (that's
   the defining property of an inverse) and `c * 0 = 0`. Now `this : 1 < 0`.
-- **`absurd (lt_trans lt_zero_one this) (lt_irrefl 0)`** -- We have `0 < 1`
-  (from `lt_zero_one`) and `1 < 0` (from `this`). By transitivity, `0 < 0`. But
+- **`absurd (lt_trans zero_lt_one this) (lt_irrefl 0)`** -- We have `0 < 1`
+  (from `zero_lt_one`) and `1 < 0` (from `this`). By transitivity, `0 < 0`. But
   `lt_irrefl` says nothing is less than itself. The `absurd` combinator takes a
   proposition and its negation and produces anything -- in this case, it produces a
   proof of `0 < c⁻¹` (since `False` implies anything).
@@ -508,7 +511,7 @@ with three axioms:
 
 | Axiom | Says | Why it matters |
 |-------|------|----------------|
-| `lt_zero_one` | `0 < 1` | Field is non-trivial |
+| `zero_lt_one` | `0 < 1` | Field is non-trivial |
 | `lt_add_left` | Adding preserves `<` | Order is translation-invariant |
 | `lt_mul_pos_left` | Positive multiplication preserves `<` | Order is scaling-invariant |
 

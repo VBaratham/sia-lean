@@ -257,7 +257,7 @@ figure out the type on its own.
 We want to prove 0 < 1 + 1 (i.e., 0 < 2). There's no single lemma that
 gives this directly, so we build it in steps:
 
-1. `have h1 : (0 : R) < 1 := lt_zero_one` — "First, note that 0 < 1."
+1. `have h1 : (0 : R) < 1 := zero_lt_one` — "First, note that 0 < 1."
    The `have` tactic proves an intermediate fact and gives it a name (`h1`).
    Here `zero_lt_one` is an axiom of our ordered field.
 2. `have h2 : 1 + 0 < 1 + 1 := lt_add_left h1 1` — "Since 0 < 1, adding 1
