@@ -53,7 +53,7 @@ theorem ftc2 {g f : R → R}
     (hg : ∀ (x : R) (d : Delta R), g (x + d.val) = g x + f x * d.val)
     {F : R → R} (hF : IsAntideriv F f) :
     ∀ (a b : R), F b - F a = g b - g a :=
-  ftc_part1 hF hg
+  antideriv_eq_any_with_slope hF hg
 
 -- ═══════════════════════════════════════════════════════
 -- The integral is well-defined

@@ -190,39 +190,6 @@ can only conclude that `F - G` is a constant. Here, the normalization condition
 
 ---
 
-## FTC Part 2: the derivative of the integral is the original function
-
-```lean
-theorem ftc_part2 {F f : R → R} (hF : IsAntideriv F f) (x : R) :
-    ∀ (d : Delta R), F (x + d.val) = F x + f x * d.val :=
-  hF.2 x
-```
-
-In traditional calculus, the Fundamental Theorem of Calculus Part 2 (sometimes
-called Part 1, depending on the textbook) says:
-
-    d/dx [integral from 0 to x of f(t) dt] = f(x)
-
-That is, if you integrate `f` and then differentiate, you get `f` back. The
-traditional proof requires the Mean Value Theorem for integrals and a careful
-limit argument.
-
-In SIA, this is literally the definition of `IsAntideriv`. The second
-component of `IsAntideriv F f` says that `F` has slope `f(x)` at every point
-`x` --- which is exactly the statement that the derivative of `F` is `f`.
-The proof is `hF.2 x`: take the second component (`.2`) of the
-antiderivative hypothesis and apply it to `x`.
-
-One line of code. Compare that with the traditional proof, which fills a page
-or more of analysis textbook. The simplicity is not because the mathematics is
-shallow --- it is because the depth has been absorbed into the axioms. The
-integration axiom *defines* the antiderivative to be a function whose slope is
-`f`. Asking for the derivative of the antiderivative is asking: "what is the
-slope of the function whose slope is defined to be `f`?" The answer is
-obviously `f`.
-
----
-
 ## Shifting an antiderivative: the normalization trick
 
 ```lean
@@ -283,7 +250,7 @@ private theorem sub_sub_cancel_right (a b c : R) : (a - c) - (b - c) = a - b := 
 ```
 
 This is a pure algebra lemma: `(a - c) - (b - c) = a - b`. The `c` terms
-cancel. This is used in the proof of FTC Part 1 below.
+cancel. This is used in the proof of `antideriv_eq_any_with_slope` below.
 
 The `private` keyword means this lemma is not visible outside the file. It is
 a helper, not part of the public API.
@@ -304,10 +271,10 @@ mathematical interest of its own --- it is bookkeeping.
 
 ---
 
-## FTC Part 1: the integral of the derivative recovers the function
+## Any function with slope f agrees with the antiderivative
 
 ```lean
-theorem ftc_part1 {F G f : R → R}
+theorem antideriv_eq_any_with_slope {F G f : R → R}
     (hG : IsAntideriv G f)
     (hslope : ∀ (x : R) (d : Delta R), F (x + d.val) = F x + f x * d.val) :
     ∀ (a b : R), G b - G a = F b - F a := by
@@ -320,7 +287,7 @@ theorem ftc_part1 {F G f : R → R}
   exact sub_sub_cancel_right (F b) (F a) (F 0)
 ```
 
-In traditional calculus, FTC Part 1 (again, numbering varies by textbook) says:
+In traditional calculus, this corresponds to the fact that
 
     integral from a to b of f(x) dx = F(b) - F(a)
 
@@ -671,8 +638,8 @@ theorem antideriv_microaffine {F f : R → R} (hF : IsAntideriv F f) (x : R) :
 ```
 
 The antiderivative `F` satisfies the microaffinity equation at every point,
-with slope `f(x)`. This is identical to `ftc_part2` above --- the same fact,
-restated for emphasis. The antiderivative is microaffine, and its slope at `x`
+with slope `f(x)`. This is just `hF.2 x` --- unwrapping the definition of
+`IsAntideriv`. The antiderivative is microaffine, and its slope at `x`
 is `f(x)`.
 
 ```lean
@@ -752,10 +719,10 @@ information to global function behavior).
 
 **SIA.** The picture is dramatically simpler:
 
-- *FTC Part 2 (derivative of the antiderivative is the original function):*
+- *Derivative of the antiderivative is the original function:*
   This is the definition of `IsAntideriv`. One line: `hF.2 x`.
 
-- *FTC Part 1 (any function with slope f gives the same differences):*
+- *Any function with slope f gives the same endpoint differences:*
   Shift the candidate by subtracting its value at zero. Use uniqueness of
   antiderivatives. Do algebra. Five lines.
 
@@ -785,9 +752,8 @@ Let us catalogue the results:
 |---------|-----------|
 | `IsAntideriv` | Definition: F is antiderivative of f means F(0) = 0 and F has slope f(x) at every x |
 | `antideriv_unique` | Two antiderivatives of f must be equal |
-| `ftc_part2` | The slope of the antiderivative is the original function |
 | `shift_is_antideriv` | Shifting F by F(0) gives a proper antiderivative |
-| `ftc_part1` | G(b) - G(a) = F(b) - F(a) for any two functions with slope f |
+| `antideriv_eq_any_with_slope` | G(b) - G(a) = F(b) - F(a) for any two functions with slope f |
 | `zero_is_antideriv_zero` | The zero function is an antiderivative of zero |
 | `zero_slope_is_zero` | Zero slope everywhere + F(0) = 0 implies F = 0 |
 | `zero_slope_is_const` | Zero slope everywhere implies F is constant |

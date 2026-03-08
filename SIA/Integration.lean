@@ -7,8 +7,8 @@
   f : R → R has a unique antiderivative F with F(0) = 0 and slope f(x) at every x.
 
   The Fundamental Theorem of Calculus is essentially built into this framework:
-  - FTC Part 1 (derivative of the integral is the original function) is the definition
-  - FTC Part 2 (integral of the derivative recovers the function) follows from uniqueness
+  - That the derivative of the integral is the original function is the definition
+  - That the integral of the derivative recovers the function follows from uniqueness
 
   We also prove linearity and additivity of integration.
 
@@ -59,17 +59,7 @@ theorem antideriv_unique {F G f : R → R}
   (SIAIntegral.integration f).unique hF hG
 
 -- ═══════════════════════════════════════════════════════
--- FTC Part 2: The slope of an antiderivative is the original function
--- ═══════════════════════════════════════════════════════
-
--- If F is the antiderivative of f, then F has slope f(x) at every x
--- (This is literally the definition of IsAntideriv, stated for clarity)
-theorem ftc_part2 {F f : R → R} (hF : IsAntideriv F f) (x : R) :
-    ∀ (d : Delta R), F (x + d.val) = F x + f x * d.val :=
-  hF.2 x
-
--- ═══════════════════════════════════════════════════════
--- FTC Part 1: Functions with the same derivative differ by a constant
+-- Any function with slope f agrees with the antiderivative
 -- ═══════════════════════════════════════════════════════
 
 -- If F has slope f(x) at every x, then (fun x => F x - F 0) is an antiderivative of f
@@ -96,10 +86,10 @@ private theorem sub_sub_cancel_right (a b c : R) : (a - c) - (b - c) = a - b := 
     _ = a + -(b) := by rw [sub_add_cancel]
     _ = a - b := by rw [← sub_eq_add_neg]
 
--- FTC Part 1: If G is the antiderivative of f, and F also has slope f(x)
+-- If G is the antiderivative of f, and F also has slope f(x)
 -- everywhere, then G(b) - G(a) = F(b) - F(a) for all a, b.
 -- In other words: ∫_a^b f = F(b) - F(a) for any F with F' = f.
-theorem ftc_part1 {F G f : R → R}
+theorem antideriv_eq_any_with_slope {F G f : R → R}
     (hG : IsAntideriv G f)
     (hslope : ∀ (x : R) (d : Delta R), F (x + d.val) = F x + f x * d.val) :
     ∀ (a b : R), G b - G a = F b - F a := by

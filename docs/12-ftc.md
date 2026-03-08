@@ -73,7 +73,7 @@ The proof is a single term: an anonymous constructor `⟨..., ...⟩` building
 the pair. No tactics needed.
 
 This is essentially a repackaging of results from `Integration.lean`
-(`ftc_part2` and `antideriv_slope_eq`), but the statement is cleaner: one
+(`antideriv_microaffine` and `antideriv_slope_eq`), but the statement is cleaner: one
 theorem that says both "f(x) is the slope" and "f(x) is the only slope."
 
 ---
@@ -85,7 +85,7 @@ theorem ftc2 {g f : R → R}
     (hg : ∀ (x : R) (d : Delta R), g (x + d.val) = g x + f x * d.val)
     {F : R → R} (hF : IsAntideriv F f) :
     ∀ (a b : R), F b - F a = g b - g a :=
-  ftc_part1 hF hg
+  antideriv_eq_any_with_slope hF hg
 ```
 
 In traditional notation: if g'(x) = f(x) for all x, then the integral of f
@@ -102,7 +102,7 @@ The conclusion says `F(b) - F(a) = g(b) - g(a)`. Since `F(b) - F(a)` is the
 natural definition of the definite integral (the antiderivative evaluated at
 the endpoints), this says the integral equals `g(b) - g(a)`.
 
-The proof is a direct call to `ftc_part1` from `Integration.lean`. The
+The proof is a direct call to `antideriv_eq_any_with_slope` from `Integration.lean`. The
 mathematical content --- shifting g by g(0), using uniqueness to equate it
 with F, doing the algebra --- was all handled there. This theorem just
 provides a clean interface.
@@ -297,7 +297,7 @@ together every strand of the project:
 | Theorem | Statement | Uses |
 |---------|-----------|------|
 | `ftc1` | (integral of f)' = f(x), uniquely | IsAntideriv + microaffinity |
-| `ftc2` | integral of g' = g(b) - g(a) | ftc_part1 from Integration.lean |
+| `ftc2` | integral of g' = g(b) - g(a) | antideriv_eq_any_with_slope from Integration.lean |
 | `integral_well_defined` | Integral independent of antiderivative choice | antideriv_unique |
 | `same_deriv_differ_by_const` | Same derivative implies differ by constant | zero_slope_is_const |
 | `eq_of_same_deriv_and_initial` | Derivative + initial value determines function | same_deriv_differ_by_const |

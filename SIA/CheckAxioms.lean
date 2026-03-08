@@ -35,9 +35,8 @@ import SIA.FTC
 
 -- Integration
 #print axioms SIA.antideriv_unique
-#print axioms SIA.ftc_part2
 #print axioms SIA.shift_is_antideriv
-#print axioms SIA.ftc_part1
+#print axioms SIA.antideriv_eq_any_with_slope
 #print axioms SIA.zero_slope_is_zero
 #print axioms SIA.zero_slope_is_const
 #print axioms SIA.antideriv_add
