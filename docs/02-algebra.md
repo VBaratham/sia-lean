@@ -698,10 +698,10 @@ theorem inv_ne_zero {a : R} (h : a ≠ 0) : a⁻¹ ≠ 0 := by
   intro hinv
   have h1 : a * a⁻¹ = 1 := mul_inv h
   rw [hinv, CommRing.mul_zero] at h1
-  exact absurd h1.symm (fun h01 => h (by
+  exact h (by
     calc a = a * 1 := by rw [CommRing.mul_one]
-      _ = a * 0 := by rw [h01]
-      _ = 0 := by rw [CommRing.mul_zero]))
+      _ = a * 0 := by rw [← h1]
+      _ = 0 := by rw [CommRing.mul_zero])
 ```
 
 This is the most complex proof in the file. It says: if `a` is nonzero, then `a⁻¹` is
@@ -722,15 +722,15 @@ takes the antecedent of an implication and moves it into the hypothesis list. So
 `rw [hinv, CommRing.mul_zero] at h1` — Substitute `a⁻¹ = 0` into `h1`, getting
 `a * 0 = 1`. Then apply `mul_zero` to get `0 = 1`. Now `h1 : 0 = 1`.
 
-`exact absurd h1.symm (...)` — The `absurd` function takes two contradictory facts
-and produces `False`. Here, `h1.symm` is `1 = 0`, and the second argument shows that
-`1 = 0` is absurd. Specifically, if `1 = 0`, then:
+`exact h (...)` — Recall that `h : a ≠ 0` means `h : a = 0 → False`. So to produce
+`False`, we just need to feed `h` a proof that `a = 0`. The `calc` block provides one:
+since `h1 : 0 = 1`, we can rewrite (right-to-left via `← h1`) to replace `1` with `0`:
 
 - `a = a * 1` (by `mul_one`)
-- `a * 1 = a * 0` (replace `1` with `0` using the assumption `1 = 0`)
+- `a * 1 = a * 0` (replace `1` with `0` using `← h1`)
 - `a * 0 = 0` (by `mul_zero`)
 
-So `a = 0`, contradicting the hypothesis `h : a ≠ 0`.
+So `a = 0`, which is exactly what `h` needs to produce `False`.
 
 This proof pattern — assume the thing you want to disprove, derive a contradiction —
 is the standard way to prove "not" statements in constructive logic.

@@ -139,12 +139,11 @@ theorem inv_ne_zero {a : R} (h : a ≠ 0) : a⁻¹ ≠ 0 := by
   intro hinv
   have h1 : a * a⁻¹ = 1 := mul_inv h
   rw [hinv, CommRing.mul_zero] at h1
-  -- h1 : 0 = 1
-  exact absurd h1.symm (fun h01 => h (by
-    -- If 1 = 0, then a = a * 1 = a * 0 = 0
+  -- h1 : 0 = 1, so a = a * 1 = a * 0 = 0, contradicting h
+  exact h (by
     calc a = a * 1 := by rw [CommRing.mul_one]
-      _ = a * 0 := by rw [h01]
-      _ = 0 := by rw [CommRing.mul_zero]))
+      _ = a * 0 := by rw [← h1]
+      _ = 0 := by rw [CommRing.mul_zero])
 
 theorem mul_div_cancel {a : R} (b : R) (h : a ≠ 0) : b / a * a = b := by
   rw [div_eq_mul_inv, CommRing.mul_assoc, inv_mul h, CommRing.mul_one]

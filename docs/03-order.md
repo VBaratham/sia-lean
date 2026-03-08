@@ -181,8 +181,12 @@ theorem lt_ne {a b : R} (h : a < b) : a ≠ b :=
   fun hab => lt_irrefl a (hab ▸ h)
 ```
 
-If `a < b`, then `a ≠ b`. The proof is a function: assume `hab : a = b`, and derive
-a contradiction.
+If `a < b`, then `a ≠ b`. Recall that `a ≠ b` means `(a = b) → False`, so we need to
+provide a function that takes a proof of `a = b` and produces `False`.
+
+The keyword `fun` creates an anonymous function (also called a lambda). The syntax
+`fun x => body` means "given `x`, return `body`." Here, `fun hab => ...` takes a
+proof `hab : a = b` and derives a contradiction.
 
 The key move is `hab ▸ h`. The `▸` operator is called "substitution" or "rewrite in
 the goal." Here, `hab` is a proof that `a = b`, and `h` is a proof that `a < b`.
