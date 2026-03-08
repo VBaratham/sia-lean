@@ -118,13 +118,16 @@ This defines "less than or equal to" for our type R. The definition is:
 > `a ≤ b` means `¬ (b < a)` — "it is not the case that b < a."
 
 This is different from what you might expect. In classical math, you'd probably define
-`a ≤ b` as `a < b ∨ a = b` ("a is strictly less than b, or they are equal"). But
-that definition is problematic constructively, because to prove `a ≤ b` you'd need to
-decide which case holds — and you might not be able to.
+`a ≤ b` as `a < b ∨ a = b` ("a is strictly less than b, or they are equal"). That
+definition is perfectly consistent constructively — it doesn't lead to contradictions.
+But it's less useful, because to prove `a ≤ b` you'd need to produce a proof of
+`a < b` or a proof of `a = b`, and sometimes you can't do either (for example, you
+can't prove `d < 0`, `d = 0`, or `0 < d` for an arbitrary infinitesimal `d`). So you'd end up with fewer theorems
+about `≤`.
 
-The negation-based definition `¬ (b < a)` is weaker: you just need to show that `b < a`
-is impossible, without having to decide whether `a < b` or `a = b`. This makes it
-much easier to work with in constructive settings.
+The negation-based definition `¬ (b < a)` is weaker (easier to satisfy): you just
+need to show that `b < a` is impossible, without having to decide which of the two
+positive cases holds. This makes `≤` provable in more situations.
 
 Note the `instance` keyword: this is creating a typeclass instance, telling Lean "here
 is how to interpret the `≤` symbol for any type R that has a `StrictOrder`." After this
