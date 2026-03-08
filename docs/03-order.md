@@ -186,7 +186,8 @@ theorem le_of_eq {a b : R} (h : a = b) : a ≤ b :=
 ```
 
 If `a = b`, then `a ≤ b`. We start with `le_refl a : a ≤ a`, and use `h ▸` to
-substitute, yielding `a ≤ b`.
+substitute `b` for the second `a`, yielding `a ≤ b`. Lean knows which `a` to
+replace because the expected return type is `a ≤ b`.
 
 ## The theorem that doesn't exist: le_antisymm
 
@@ -238,7 +239,18 @@ By `ne_lt`, `a ≠ b` gives us `a < b ∨ b < a`:
 
     ne_lt hne : a < b ∨ b < a
 
-Now eliminate the `Or`:
+Now we use `.elim` to do case analysis on the `Or`. The method `.elim` on
+`P ∨ Q` takes two functions — one handling the case where P holds, one handling
+the case where Q holds — and both must produce the same result type:
+
+```lean
+h.elim (fun hp => ...) (fun hq => ...)
+```
+
+(See the [Lean reference appendix](appendix-lean-reference.md) for more on
+`.elim`, including its use on `False`.)
+
+Here, `(ne_lt hne).elim` splits into two cases:
 
 **Case 1: `a < b`.** We have `h : a < b`. But `hba : b ≤ a` means `¬ (a < b)`. So
 `hba h : False`. Contradiction.
@@ -257,26 +269,6 @@ transitive). In SIA, `≤` is reflexive, but antisymmetry only holds behind a do
 negation. (Transitivity of `≤` can be proved if you add cotransitivity — see the
 [appendix](appendix-cotransitivity.md).) This is not a defect — it's a feature. It
 reflects the genuine underdetermination of order among infinitesimals.
-
-## Summary of `.elim` patterns
-
-Since `.elim` appears many times in this file, here is a summary of the two forms
-used:
-
-**`Or.elim` — case analysis on a disjunction.** If you have `h : P ∨ Q` and you want
-to prove `R`, you write:
-
-```lean
-h.elim (fun hp => ...) (fun hq => ...)
-```
-
-The first function handles the case where P holds; the second handles Q. Both must
-return something of type R.
-
-**`False.elim` — anything from a contradiction.** If you have `h : False`, then
-`h.elim` produces a value of any type. This is ex falso quodlibet: from a
-contradiction, anything follows. You see this in `(hab h).elim` where `hab : ¬ X`
-and `h : X`, so `hab h : False`, and `.elim` converts it to whatever type is needed.
 
 ## What we've built
 
