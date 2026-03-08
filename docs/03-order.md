@@ -250,7 +250,9 @@ h.elim (fun hp => ...) (fun hq => ...)
 (See the [Lean reference appendix](appendix-lean-reference.md) for more on
 `.elim`, including its use on `False`.)
 
-Here, `(ne_lt hne).elim` splits into two cases:
+Here, the result type is `False` (since we're inside `fun hne =>`, proving
+`(a ≠ b) → False`). So `(ne_lt hne).elim` splits into two cases, each of which
+must produce `False`:
 
 **Case 1: `a < b`.** We have `h : a < b`. But `hba : b ≤ a` means `¬ (a < b)`. So
 `hba h : False`. Contradiction.

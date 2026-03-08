@@ -33,6 +33,29 @@ a type with no terms (an "empty type"). Proving a theorem means constructing a t
 Lean's type checker accepts as inhabiting the theorem's type. If the code compiles, the
 proof is valid.
 
+### The Curry-Howard dictionary
+
+This correspondence runs deep. Every logical concept has a programming counterpart:
+
+| Logic | Programming | Lean |
+|-------|-------------|------|
+| Statement / proposition | Type | `a < b`, `P ∨ Q` |
+| Proof of a statement | Value of that type | `lt_irrefl a` |
+| Implication `P → Q` | Function type `P → Q` | `fun (h : P) => ...` |
+| Modus ponens (applying an implication) | Function application | `h_impl h_proof` |
+| Conjunction `P ∧ Q` | Pair type `P × Q` | `⟨proof_p, proof_q⟩` |
+| Disjunction `P ∨ Q` | Sum type (either P or Q) | `Or.inl h` / `Or.inr h` |
+| Negation `¬P` | Function `P → False` | `fun (h : P) => ...` |
+| False | Empty type (no constructors) | `False` |
+| True | Unit type (trivial to construct) | `True` |
+| Universal `∀ x, P x` | Dependent function `(x : α) → P x` | `fun x => ...` |
+| Existential `∃ x, P x` | Dependent pair `⟨x, proof⟩` | `⟨witness, proof⟩` |
+
+You don't need to memorize this table to follow the proofs in this project —
+the individual articles explain each pattern as it comes up. But it helps to
+know that there is a single organizing principle behind it all: logic *is*
+programming.
+
 ### How can a type have no values?
 
 If you're coming from a programming background, this might seem strange. In most
