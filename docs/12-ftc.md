@@ -144,7 +144,7 @@ theorem same_deriv_differ_by_const {f g : R → R} {h : R → R}
       (f (x + d.val) - g (x + d.val)) = (f x - g x) + (0 : R) * d.val := by
     intro x d
     rw [hf x d, hg x d, zero_mul, add_zero]
-    rw [sub_eq (f x + h x * d.val), sub_eq (f x)]
+    rw [sub_eq_add_neg (f x + h x * d.val), sub_eq_add_neg (f x)]
     rw [neg_add_distrib, add_assoc,
         ← add_assoc (h x * d.val), add_comm (h x * d.val) (-(g x)),
         add_assoc (-(g x))]

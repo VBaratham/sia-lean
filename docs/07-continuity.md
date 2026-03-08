@@ -175,12 +175,12 @@ actually the proof takes a slightly indirect route through the neighbor relation
 ```lean
     have n_0neg : Neighbors 0 (-d.val) := by
       show (0 - -d.val) * (0 - -d.val) = 0
-      rw [sub_eq, neg_neg, zero_add]
+      rw [sub_eq_add_neg, neg_neg, zero_add]
       exact d.property
 ```
 
 **Step 2: 0 is a neighbor of -d.** We need `(0 - (-d))^2 = 0`. The rewrites simplify
-`0 - (-d)` step by step: `sub_eq` rewrites subtraction as addition of the negation,
+`0 - (-d)` step by step: `sub_eq_add_neg` rewrites subtraction as addition of the negation,
 giving `0 + -(-d)`. Then `neg_neg` simplifies `-(-d)` to `d`. Then `zero_add` simplifies
 `0 + d` to `d`. The goal becomes `d * d = 0`, which is `d.property` — the defining
 property of a Delta element.
@@ -196,12 +196,12 @@ transitivity, `Neighbors a (-d)`. This means `(a - (-d))^2 = 0`.
 ```lean
     show (a + d.val) * (a + d.val) = 0
     have : (a - -d.val) * (a - -d.val) = 0 := n_aneg
-    rw [sub_eq, neg_neg] at this
+    rw [sub_eq_add_neg, neg_neg] at this
     exact this
 ```
 
 **Step 4: Convert to the form we need.** We have `(a - (-d))^2 = 0`. But
-`a - (-d) = a + d` (subtracting a negative is adding). The `rw [sub_eq, neg_neg]`
+`a - (-d) = a + d` (subtracting a negative is adding). The `rw [sub_eq_add_neg, neg_neg]`
 performs this simplification in the hypothesis `this`, turning it into
 `(a + d) * (a + d) = 0`, which is exactly what we needed to prove.
 
@@ -291,7 +291,7 @@ subtype predicate.
 ```lean
   have hx_eq : x = y + d.val := by
     show x = y + (x - y)
-    have : y + (x - y) = y + (x + -y) := by rw [sub_eq]
+    have : y + (x - y) = y + (x + -y) := by rw [sub_eq_add_neg]
     rw [this, add_comm x, ← add_assoc, add_neg, zero_add]
 ```
 
@@ -299,7 +299,7 @@ This establishes that `x = y + d` — that is, x is obtained from y by adding th
 infinitesimal d. The proof just does algebra: `y + (x - y) = y + x - y = x`. The
 individual steps are:
 
-- `sub_eq` rewrites `x - y` as `x + (-y)`
+- `sub_eq_add_neg` rewrites `x - y` as `x + (-y)`
 - `add_comm x` swaps to get `y + (-y + x)`... actually, let's trace more carefully.
   After `rw [this]`, the goal is `x = y + (x + -y)`. Then `add_comm x` makes it
   `x = y + (-y + x)`. Then `← add_assoc` regroups to `x = (y + -y) + x`. Then
@@ -345,7 +345,7 @@ substitution, and `exact ha d` applies the microaffinity equation to our specifi
   show (f x - f y) * (f x - f y) = 0
   have diff_eq : f x - f y = a * d.val := by
     calc f x - f y = (f y + a * d.val) - f y := by rw [hfd]
-      _ = (f y + a * d.val) + -(f y) := by rw [sub_eq]
+      _ = (f y + a * d.val) + -(f y) := by rw [sub_eq_add_neg]
       _ = (a * d.val + f y) + -(f y) := by rw [add_comm (f y)]
       _ = a * d.val + (f y + -(f y)) := by rw [add_assoc]
       _ = a * d.val + 0 := by rw [add_neg]

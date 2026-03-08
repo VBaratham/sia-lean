@@ -325,7 +325,7 @@ reasoning about inverses, case analysis via apartness, and proof by contradictio
 theorem one_div_pos_of_pos {c : R} (hc : 0 < c) : 0 < 1 / c := by
   have c_ne : c ≠ 0 := Ne.symm (lt_ne hc)
   have inv_ne : c⁻¹ ≠ 0 := CField.inv_ne_zero c_ne
-  have one_div_eq : 1 / c = c⁻¹ := by rw [CField.div_eq, one_mul]
+  have one_div_eq : 1 / c = c⁻¹ := by rw [CField.div_eq_mul_inv, one_mul]
   rw [one_div_eq]
   exact (ne_lt inv_ne).elim
     (fun h => by
@@ -394,7 +394,7 @@ theorem le_mul_pos_left {a b c : R} (hab : a ≤ b) (hc : 0 ≤ c) : c * a ≤ c
     (fun c_neg => hc c_neg)
     (fun c_pos => by
       have inv_pos : 0 < c⁻¹ := by
-        have : 1 / c = c⁻¹ := by rw [CField.div_eq, one_mul]
+        have : 1 / c = c⁻¹ := by rw [CField.div_eq_mul_inv, one_mul]
         rw [← this]; exact one_div_pos_of_pos c_pos
       have : c⁻¹ * (c * b) < c⁻¹ * (c * a) := lt_mul_pos_left inv_pos hba
       rw [← mul_assoc, CField.inv_mul c_ne, one_mul,
@@ -452,7 +452,7 @@ and recover `b < a`.
 
 ```lean
 have inv_pos : 0 < c⁻¹ := by
-  have : 1 / c = c⁻¹ := by rw [CField.div_eq, one_mul]
+  have : 1 / c = c⁻¹ := by rw [CField.div_eq_mul_inv, one_mul]
   rw [← this]; exact one_div_pos_of_pos c_pos
 ```
 

@@ -169,12 +169,12 @@ Here are the tactics you'll see most often:
 
 ```lean
 theorem sub_self (a : R) : a - a = 0 := by
-  rw [sub_eq, add_neg]
+  rw [sub_eq_add_neg, add_neg]
 ```
 
 The proof has two steps:
 
-1. `rw [sub_eq]` — The lemma `sub_eq` says `a - b = a + (-b)`. This rewrites
+1. `rw [sub_eq_add_neg]` — The lemma `sub_eq_add_neg` says `a - b = a + (-b)`. This rewrites
    the goal from `a - a = 0` to `a + (-a) = 0`.
 2. `rw [add_neg]` — The lemma `add_neg` says `a + (-a) = 0`. This rewrites
    the goal from `a + (-a) = 0` to `0 = 0`, which is trivially true.
@@ -187,18 +187,18 @@ inverse axiom, a + (-a) = 0."
 `rw [lemma]` rewrites the **first** matching occurrence in the goal, scanning
 left to right. If the goal has multiple matches, only the first one changes.
 
-For example, if the goal were `(a - b) + (c - d) = ...`, then `rw [sub_eq]`
+For example, if the goal were `(a - b) + (c - d) = ...`, then `rw [sub_eq_add_neg]`
 would rewrite only `a - b` to `a + (-b)`, leaving `c - d` untouched. To
-rewrite both, you'd chain two rewrites: `rw [sub_eq, sub_eq]`.
+rewrite both, you'd chain two rewrites: `rw [sub_eq_add_neg, sub_eq_add_neg]`.
 
 You can also be explicit about *which* occurrence to rewrite by providing
-arguments to the lemma. `sub_eq` says `∀ (a b : R), a - b = a + (-b)`. If
-you write `rw [sub_eq c d]`, Lean will specifically rewrite `c - d` and leave
+arguments to the lemma. `sub_eq_add_neg` says `∀ (a b : R), a - b = a + (-b)`. If
+you write `rw [sub_eq_add_neg c d]`, Lean will specifically rewrite `c - d` and leave
 other subtractions alone. For example, if the goal is:
 
     (a - b) + (c - d) = ...
 
-then `rw [sub_eq c d]` rewrites only the second subtraction, giving
+then `rw [sub_eq_add_neg c d]` rewrites only the second subtraction, giving
 `(a - b) + (c + (-d)) = ...`.
 
 ### Example 6: `neg_add_cancel_left`
@@ -222,13 +222,13 @@ Read this proof and explain each step:
 
 ```lean
 theorem sub_add_cancel (a b : R) : a - b + b = a := by
-  rw [sub_eq, add_assoc, neg_add, add_zero]
+  rw [sub_eq_add_neg, add_assoc, neg_add, add_zero]
 ```
 
 <details>
 <summary>Answer</summary>
 
-1. `sub_eq` — rewrites `a - b` to `a + (-b)`, giving goal `(a + (-b)) + b = a`
+1. `sub_eq_add_neg` — rewrites `a - b` to `a + (-b)`, giving goal `(a + (-b)) + b = a`
 2. `add_assoc` — reassociates to `a + ((-b) + b) = a`
 3. `neg_add` — rewrites `(-b) + b` to `0`, giving `a + 0 = a`
 4. `add_zero` — rewrites `a + 0` to `a`, giving `a = a`. Done.
@@ -335,7 +335,7 @@ Here's a proof using `rw`:
 
 ```lean
 theorem sub_zero (a : R) : a - 0 = a := by
-  rw [sub_eq, neg_zero, add_zero]
+  rw [sub_eq_add_neg, neg_zero, add_zero]
 ```
 
 Three steps: expand subtraction (`a - 0` → `a + (-0)`), simplify `-0` to `0`,
@@ -347,7 +347,7 @@ theorem sub_zero (a : R) : a - 0 = a := by
 ```
 
 Where `rw` applies one named lemma at a time, `simp` applies many at once.
-It knows about `sub_eq`, `neg_zero`, and `add_zero` because they are
+It knows about `sub_eq_add_neg`, `neg_zero`, and `add_zero` because they are
 registered as `@[simp]` lemmas (via the `attribute [simp]` or `@[simp]`
 annotations in `Algebra.lean`). It figures out the right sequence of rewrites
 automatically.

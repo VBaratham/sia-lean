@@ -37,12 +37,12 @@ theorem neighbors_not_transitive :
       rw [sub_zero]; exact ha
     have n_0neg : Neighbors 0 (-d.val) := by
       show (0 - -d.val) * (0 - -d.val) = 0
-      rw [sub_eq, neg_neg, zero_add]
+      rw [sub_eq_add_neg, neg_neg, zero_add]
       exact d.property
     have n_aneg : Neighbors a (-d.val) := h_trans n_a0 n_0neg
     show (a + d.val) * (a + d.val) = 0
     have : (a - -d.val) * (a - -d.val) = 0 := n_aneg
-    rw [sub_eq, neg_neg] at this
+    rw [sub_eq_add_neg, neg_neg] at this
     exact this
   exact delta_not_microstable this
 
@@ -55,14 +55,14 @@ theorem all_continuous (f : R → R) :
   let d : Delta R := ⟨d_val, d_sq⟩
   have hx_eq : x = y + d.val := by
     show x = y + (x - y)
-    have : y + (x - y) = y + (x + -y) := by rw [sub_eq]
+    have : y + (x - y) = y + (x + -y) := by rw [sub_eq_add_neg]
     rw [this, add_comm x, ← add_assoc, add_neg, zero_add]
   obtain ⟨a, ha, _⟩ := microaffinity f y
   have hfd : f x = f y + a * d.val := by rw [hx_eq]; exact ha d
   show (f x - f y) * (f x - f y) = 0
   have diff_eq : f x - f y = a * d.val := by
     calc f x - f y = (f y + a * d.val) - f y := by rw [hfd]
-      _ = (f y + a * d.val) + -(f y) := by rw [sub_eq]
+      _ = (f y + a * d.val) + -(f y) := by rw [sub_eq_add_neg]
       _ = (a * d.val + f y) + -(f y) := by rw [add_comm (f y)]
       _ = a * d.val + (f y + -(f y)) := by rw [add_assoc]
       _ = a * d.val + 0 := by rw [add_neg]

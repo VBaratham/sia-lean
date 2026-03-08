@@ -67,7 +67,7 @@ class CommRing (R : Type u) extends Add R, Mul R, Neg R, Sub R, Zero R, One R wh
   add_comm      : ∀ (a b : R), a + b = b + a
   add_zero      : ∀ (a : R), a + 0 = a
   add_neg       : ∀ (a : R), a + (-a) = 0
-  sub_eq        : ∀ (a b : R), a - b = a + (-b)
+  sub_eq_add_neg        : ∀ (a b : R), a - b = a + (-b)
   mul_assoc     : ∀ (a b c : R), (a * b) * c = a * (b * c)
   mul_comm      : ∀ (a b : R), a * b = b * a
   mul_one       : ∀ (a : R), a * 1 = a
@@ -140,7 +140,7 @@ Now the axioms themselves. If you have taken any algebra course, these will be f
 
 **Subtraction:**
 
-- `sub_eq`: `a - b = a + (-b)` — Subtraction is just addition of the negative. This
+- `sub_eq_add_neg`: `a - b = a + (-b)` — Subtraction is just addition of the negative. This
   *defines* subtraction in terms of addition and negation.
 
 **Multiplication axioms:**
@@ -240,9 +240,32 @@ theorem right_distrib (a b c : R) : (a + b) * c = a * c + b * c := by
   rw [mul_comm, left_distrib, mul_comm c a, mul_comm c b]
 ```
 
-These are the first theorems in the file, and they all follow the same pattern: use
-commutativity to flip the operands, then apply the corresponding axiom. Each one is
-the "mirror image" of an axiom:
+These are the first theorems in the file, so let's slow down and read the syntax
+carefully using `zero_add` as our example.
+
+`theorem` introduces a theorem. (Lean also accepts `lemma` — the two keywords are
+interchangeable.) `zero_add` is the name. `(a : R)` is an explicit argument: this
+theorem takes an element `a` of type `R`. The part after the colon, `0 + a = a`, is
+the statement.
+
+`:= by` begins the proof. The keyword `by` switches Lean into **tactic mode**, where
+you give step-by-step instructions for building the proof. Think of it like giving
+directions ("turn left, then go straight") rather than specifying GPS coordinates.
+
+`rw [add_comm, add_zero]` is the proof itself. The `rw` tactic stands for **rewrite**.
+It takes a lemma and finds the first occurrence of its left-hand side in the goal and
+replaces it with the right-hand side. Multiple lemmas in square brackets are applied
+in sequence. Here:
+
+1. `rw [add_comm]` transforms `0 + a = a` into `a + 0 = a` (swapping the addition).
+2. `rw [add_zero]` transforms `a + 0 = a` into `a = a`, which Lean accepts as trivially
+   true.
+
+That is the pattern for most proofs in this file: rewrite using known facts until the
+goal becomes trivially true.
+
+All four theorems follow the same pattern — use commutativity to flip the operands,
+then apply the corresponding axiom. Each one is the "mirror image" of an axiom:
 
 - `zero_add` (`0 + a = a`) from `add_zero` (`a + 0 = a`)
 - `neg_add` (`(-a) + a = 0`) from `add_neg` (`a + (-a) = 0`)
@@ -293,13 +316,24 @@ theorem add_left_cancel {a b c : R} (h : a + b = a + c) : b = c := by
   exact this
 ```
 
-If `a + b = a + c`, then `b = c`. You can cancel from the left. The proof adds `-a`
-to both sides. (The `have :` without a name creates an anonymous hypothesis; Lean calls
-it `this`.)
+If `a + b = a + c`, then `b = c`. You can cancel from the left.
+
+This proof introduces several new pieces of syntax. First, the signature: the
+**curly braces** `{a b c : R}` make `a`, `b`, and `c` **implicit arguments** — Lean
+will infer them from context, so callers don't have to specify them. The parenthesized
+`(h : a + b = a + c)` is an explicit **hypothesis**: a proof that `a + b = a + c` that
+the caller must provide. Think of `h` as "the thing the caller must hand us."
+
+The `have` keyword introduces an intermediate fact within a proof. The syntax
+`have h : T := proof` says "prove `T`, and call the result `h`, so I can use it later."
+Here, `have :` (with no name) creates an anonymous hypothesis that Lean calls `this`.
+The proof adds `-a` to both sides of `h`.
 
 The `at this` syntax tells `rw` to rewrite in the hypothesis `this` rather than in the
-goal. After the two rewrites, `this` becomes `b = c`, and `exact this` finishes the
-proof.
+goal. After the two rewrites, `this` becomes `b = c`.
+
+Finally, `exact this` finishes the proof. The `exact` tactic says "here is the proof
+term directly" — it hands Lean the exact term that matches the goal.
 
 Notice this comes right after the cancellation lemmas, because `add_left_cancel` depends
 on `neg_add_cancel_left`. It is also used in the very next proof, `mul_zero`.
@@ -342,10 +376,6 @@ This theorem says: if `a + b = 0`, then `b` must be `-a`. In other words, the ad
 inverse is unique. You might already know this intuitively — there is only one number
 you can add to 5 to get 0, and it is -5.
 
-The curly braces `{a b : R}` make `a` and `b` implicit arguments — Lean will infer
-them from context. The parenthesized `(h : a + b = 0)` is an explicit **hypothesis**:
-a proof that `a + b = 0`. Think of `h` as "the thing the caller must hand us."
-
 This proof uses a new tactic: `calc`. The `calc` tactic lets you write a chain of
 equalities, like a calculation on a whiteboard. Each line has the form
 `_ = (something) := by (justification)`. The underscore `_` stands for "whatever the
@@ -378,8 +408,9 @@ theorem neg_zero : (-0 : R) = 0 :=
 Both of these use `neg_unique` to derive facts about negation.
 
 `neg_neg` says double negation cancels: `-(-a) = a`. The proof observes that
-`(-a) + a = 0` (by `neg_add`), so by `neg_unique`, `a = -(-a)`. The `.symm` flips
-the equality to the desired direction.
+`(-a) + a = 0` (by `neg_add`), so by `neg_unique`, `a = -(-a)`. But our goal is
+`-(-a) = a` — the sides are swapped. The `.symm` method flips an equality: if `p` is
+a proof of `x = y`, then `p.symm` is a proof of `y = x`.
 
 `neg_zero` says the negation of zero is zero: `-0 = 0`. The proof observes that
 `0 + 0 = 0` (by `add_zero`), so by `neg_unique`, `0 = -0`. Again, `.symm` flips it.
@@ -430,43 +461,15 @@ all precede this line.
 
 ```lean
 @[simp] theorem sub_self (a : R) : a - a = 0 := by
-  rw [sub_eq, add_neg]
+  rw [sub_eq_add_neg, add_neg]
 ```
 
-This is a **derived lemma** — a theorem proved from the axioms, rather than
-assumed. Let's read every part of this line.
+`a - a = 0`: expand subtraction via `sub_eq_add_neg`, then cancel via `add_neg`.
 
-`@[simp]` is an **attribute annotation**. It does the same thing as the `attribute
-[simp]` line above, but for a single theorem. It registers `sub_self` as a
-simplification rule: whenever Lean sees `a - a`, it can simplify to `0`.
-
-`theorem` introduces a theorem (or lemma — Lean does not distinguish between the two
-keywords `theorem` and `lemma`).
-
-`sub_self` is the name of the theorem.
-
-`(a : R)` is an explicit argument: this theorem takes an element `a` of type `R`.
-
-`: a - a = 0` is the statement: "a minus a equals zero."
-
-`:= by` begins the proof. The keyword `by` switches Lean into **tactic mode**. In
-tactic mode, you give step-by-step instructions for building the proof, rather than
-writing the proof term directly. Think of it like giving directions ("turn left, then
-go straight") rather than specifying the destination's GPS coordinates.
-
-Now the proof itself:
-
-- `rw [sub_eq]` — The `rw` tactic stands for **rewrite**. It takes a lemma and
-  finds the first occurrence of the left-hand side in the goal and replaces it
-  with the right-hand side.
-  Here, `sub_eq` says `a - b = a + (-b)`, so `rw [sub_eq]` transforms the goal
-  from `a - a = 0` to `a + (-a) = 0`.
-
-- `rw [add_neg]` — Now `add_neg` says `a + (-a) = 0`, so this rewrite transforms
-  `a + (-a) = 0` into `0 = 0`, which Lean accepts as trivially true.
-
-That is the pattern for most proofs in this file: rewrite using known facts until the
-goal becomes trivially true.
+The `@[simp]` before `theorem` is an **attribute annotation**. It does the same thing
+as the `attribute [simp]` line above, but for a single theorem at the point of
+definition. It registers `sub_self` as a simplification rule: when the `simp` tactic
+is invoked, `a - a` can be simplified to `0`.
 
 ### Negation distributes over addition
 
@@ -492,22 +495,16 @@ The proof strategy is clever. Rather than manipulating `-(a + b)` directly, it u
 `neg_unique`: if we can show that `(a + b) + (-a + -b) = 0`, then by uniqueness of
 inverses, `-a + -b` must equal `-(a + b)`.
 
-The `have` keyword introduces an intermediate result. `have h : ... := by ...` says
-"let me first prove this intermediate fact, and call it `h`." Then we use `h` in the
-final step.
+The `have` block (which we first saw in `add_left_cancel`) proves an intermediate fact
+`h`, and then `h` is used in the final step.
 
 The `calc` block proves the intermediate fact by a long chain of associativity and
 commutativity manipulations — the kind of routine rearrangement you would do on paper
 without writing down every step. In Lean, every step must be justified.
 
-The final line `exact (neg_unique h).symm` deserves explanation:
-
-- `exact` is a tactic that says "here is the proof term directly."
-- `neg_unique h` gives us a proof that `-a + -b = -(a + b)` (the inverse of `a + b`
-  is `-a + -b`).
-- But our goal is `-(a + b) = -a + -b` — the sides are swapped.
-- `.symm` flips an equality: if `p` is a proof of `x = y`, then `p.symm` is a proof
-  of `y = x`.
+The final line `exact (neg_unique h).symm` combines two things we've seen before:
+`neg_unique h` gives a proof that `-a + -b = -(a + b)`, and `.symm` flips it to match
+our goal `-(a + b) = -a + -b`.
 
 ### Negative times negative
 
@@ -525,14 +522,14 @@ negation signs into and out of products, then cancels the double negation.
 
 ```lean
 theorem mul_sub (a b c : R) : a * (b - c) = a * b - a * c := by
-  rw [sub_eq, sub_eq, left_distrib, neg_mul_right]
+  rw [sub_eq_add_neg, sub_eq_add_neg, left_distrib, neg_mul_right]
 
 theorem sub_mul (a b c : R) : (a - b) * c = a * c - b * c := by
-  rw [sub_eq, sub_eq, right_distrib, neg_mul_left]
+  rw [sub_eq_add_neg, sub_eq_add_neg, right_distrib, neg_mul_left]
 ```
 
 These distribute multiplication over subtraction. The proofs expand subtraction as
-"add the negative" (using `sub_eq`), apply distributivity, then fold a negation back
+"add the negative" (using `sub_eq_add_neg`), apply distributivity, then fold a negation back
 into the product.
 
 ### Right cancellation
@@ -558,10 +555,10 @@ intervening proofs — it is placed where it is first used later in the codebase
 
 ```lean
 theorem sub_add_cancel (a b : R) : a - b + b = a := by
-  rw [sub_eq, add_assoc, neg_add, add_zero]
+  rw [sub_eq_add_neg, add_assoc, neg_add, add_zero]
 
 theorem add_sub_cancel (a b : R) : a + b - b = a := by
-  rw [sub_eq, add_assoc, add_neg, add_zero]
+  rw [sub_eq_add_neg, add_assoc, add_neg, add_zero]
 ```
 
 These say that subtraction and addition are inverse operations: subtracting `b` and
@@ -572,10 +569,10 @@ expand subtraction, reassociate, cancel the inverse pair, and drop the zero.
 
 ```lean
 @[simp] theorem sub_zero (a : R) : a - 0 = a := by
-  rw [sub_eq, neg_zero, add_zero]
+  rw [sub_eq_add_neg, neg_zero, add_zero]
 
 @[simp] theorem zero_sub (a : R) : 0 - a = -a := by
-  rw [sub_eq, zero_add]
+  rw [sub_eq_add_neg, zero_add]
 ```
 
 Subtracting zero does nothing. Subtracting from zero gives the negation. Both are
@@ -585,7 +582,7 @@ marked `@[simp]` because they are straightforward simplifications.
 
 ```lean
 theorem neg_sub (a b : R) : -(a - b) = b - a := by
-  rw [sub_eq, sub_eq, neg_add_distrib, neg_neg, add_comm]
+  rw [sub_eq_add_neg, sub_eq_add_neg, neg_add_distrib, neg_neg, add_comm]
 ```
 
 Negating a difference flips the order: `-(a - b) = b - a`. The proof expands both
@@ -605,7 +602,7 @@ With commutative rings in hand, we now define fields — rings where you can als
 
 ```lean
 class CField (R : Type u) extends CommRing R, Inv R, Div R where
-  div_eq      : ∀ (a b : R), a / b = a * b⁻¹
+  div_eq_mul_inv      : ∀ (a b : R), a / b = a * b⁻¹
   mul_inv     : ∀ {a : R}, a ≠ 0 → a * a⁻¹ = 1
   inv_zero    : (0 : R)⁻¹ = 0
 ```
@@ -630,8 +627,8 @@ extends `CommRing` and adds axioms about inversion and division.
 
 ### The field axioms
 
-- `div_eq`: `a / b = a * b⁻¹` — Division is multiplication by the inverse. This
-  *defines* division in terms of multiplication and inversion, just as `sub_eq` defined
+- `div_eq_mul_inv`: `a / b = a * b⁻¹` — Division is multiplication by the inverse. This
+  *defines* division in terms of multiplication and inversion, just as `sub_eq_add_neg` defined
   subtraction in terms of addition and negation.
 
 - `mul_inv`: `a ≠ 0 → a * a⁻¹ = 1` — Every nonzero element times its inverse is 1.
@@ -653,20 +650,17 @@ This last axiom deserves special discussion. In ordinary mathematics, `0⁻¹` (
 is **undefined**. You are told in school that you cannot divide by zero, full stop.
 
 But in Lean (and in type theory more broadly), every function must be **total** — it
-must return a value for every input. The inverse function `⁻¹` has type `R → R`. It
-takes any element of `R` and returns an element of `R`. There is no way to say "this
-function is undefined at 0." It *must* return something.
+must return a value for every input. If the inverse function `⁻¹` has type `R → R`,
+it *must* return something for every input, including 0. There are two options:
 
-So what should `0⁻¹` be? We have a few options:
+1. **Restrict the domain.** Change the type so that `⁻¹` only accepts nonzero inputs
+   (e.g., take a proof of `a ≠ 0` as an argument). The function is still total, but
+   its domain excludes 0.
+2. **Pick a value.** Define `0⁻¹` to be some specific element and move on.
 
-1. Make the function return some arbitrary "junk" value at 0.
-2. Change the type so that `⁻¹` only accepts nonzero inputs.
-3. Pick a specific convenient value.
-
-Option 2 is used in some formalizations but makes everything more complicated — you
+Option 1 is used in some formalizations but makes everything more complicated — you
 would need to carry around a proof that the denominator is nonzero everywhere you use
-division. Option 1 is what Mathlib does (and it also picks 0 as the junk value).
-Option 3, which we also use, picks `0⁻¹ = 0` as an explicit axiom.
+division. We use option 2, picking `0⁻¹ = 0`. (Mathlib makes the same choice.)
 
 The choice of `0` is arbitrary but harmless. The axiom `mul_inv` only applies when
 `a ≠ 0`, so you can never derive `0 * 0⁻¹ = 1` — that would require `a ≠ 0` with
@@ -745,7 +739,7 @@ is the standard way to prove "not" statements in constructive logic.
 
 ```lean
 theorem mul_div_cancel {a : R} (b : R) (h : a ≠ 0) : b / a * a = b := by
-  rw [div_eq, CommRing.mul_assoc, inv_mul h, CommRing.mul_one]
+  rw [div_eq_mul_inv, CommRing.mul_assoc, inv_mul h, CommRing.mul_one]
 ```
 
 Dividing by `a` and then multiplying by `a` gives you back what you started with. The
@@ -754,7 +748,7 @@ and drops the `* 1`.
 
 ```lean
 theorem div_mul_cancel {a : R} (b : R) (h : a ≠ 0) : a * (b / a) = b := by
-  rw [div_eq, CommRing.mul_comm b, ← CommRing.mul_assoc, mul_inv h, CommRing.one_mul]
+  rw [div_eq_mul_inv, CommRing.mul_comm b, ← CommRing.mul_assoc, mul_inv h, CommRing.one_mul]
 ```
 
 The other direction: multiplying by `a` and then dividing by `a` (or equivalently,

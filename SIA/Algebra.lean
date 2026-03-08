@@ -13,7 +13,7 @@ class CommRing (R : Type u) extends Add R, Mul R, Neg R, Sub R, Zero R, One R wh
   add_comm      : ∀ (a b : R), a + b = b + a
   add_zero      : ∀ (a : R), a + 0 = a
   add_neg       : ∀ (a : R), a + (-a) = 0
-  sub_eq        : ∀ (a b : R), a - b = a + (-b)
+  sub_eq_add_neg : ∀ (a b : R), a - b = a + (-b)
   mul_assoc     : ∀ (a b c : R), (a * b) * c = a * (b * c)
   mul_comm      : ∀ (a b : R), a * b = b * a
   mul_one       : ∀ (a : R), a * 1 = a
@@ -76,7 +76,7 @@ attribute [simp] add_zero zero_add add_neg neg_add mul_one one_mul mul_zero zero
 
 -- Useful derived lemmas
 @[simp] theorem sub_self (a : R) : a - a = 0 := by
-  rw [sub_eq, add_neg]
+  rw [sub_eq_add_neg, add_neg]
 
 theorem neg_add_distrib (a b : R) : -(a + b) = -a + -b := by
   have h : (a + b) + (-a + -b) = 0 := by
@@ -96,10 +96,10 @@ theorem neg_mul_neg (a b : R) : (-a) * (-b) = a * b := by
     _ = a * b := by rw [neg_neg]
 
 theorem mul_sub (a b c : R) : a * (b - c) = a * b - a * c := by
-  rw [sub_eq, sub_eq, left_distrib, neg_mul_right]
+  rw [sub_eq_add_neg, sub_eq_add_neg, left_distrib, neg_mul_right]
 
 theorem sub_mul (a b c : R) : (a - b) * c = a * c - b * c := by
-  rw [sub_eq, sub_eq, right_distrib, neg_mul_left]
+  rw [sub_eq_add_neg, sub_eq_add_neg, right_distrib, neg_mul_left]
 
 theorem add_right_cancel {a b c : R} (h : a + c = b + c) : a = b := by
   have : (a + c) + -c = (b + c) + -c := by rw [h]
@@ -107,24 +107,24 @@ theorem add_right_cancel {a b c : R} (h : a + c = b + c) : a = b := by
   exact this
 
 theorem sub_add_cancel (a b : R) : a - b + b = a := by
-  rw [sub_eq, add_assoc, neg_add, add_zero]
+  rw [sub_eq_add_neg, add_assoc, neg_add, add_zero]
 
 theorem add_sub_cancel (a b : R) : a + b - b = a := by
-  rw [sub_eq, add_assoc, add_neg, add_zero]
+  rw [sub_eq_add_neg, add_assoc, add_neg, add_zero]
 
 @[simp] theorem sub_zero (a : R) : a - 0 = a := by
-  rw [sub_eq, neg_zero, add_zero]
+  rw [sub_eq_add_neg, neg_zero, add_zero]
 
 @[simp] theorem zero_sub (a : R) : 0 - a = -a := by
-  rw [sub_eq, zero_add]
+  rw [sub_eq_add_neg, zero_add]
 
 theorem neg_sub (a b : R) : -(a - b) = b - a := by
-  rw [sub_eq, sub_eq, neg_add_distrib, neg_neg, add_comm]
+  rw [sub_eq_add_neg, sub_eq_add_neg, neg_add_distrib, neg_neg, add_comm]
 
 end CommRing
 
 class CField (R : Type u) extends CommRing R, Inv R, Div R where
-  div_eq      : ∀ (a b : R), a / b = a * b⁻¹
+  div_eq_mul_inv : ∀ (a b : R), a / b = a * b⁻¹
   mul_inv     : ∀ {a : R}, a ≠ 0 → a * a⁻¹ = 1
   inv_zero    : (0 : R)⁻¹ = 0
 
@@ -147,10 +147,10 @@ theorem inv_ne_zero {a : R} (h : a ≠ 0) : a⁻¹ ≠ 0 := by
       _ = 0 := by rw [CommRing.mul_zero]))
 
 theorem mul_div_cancel {a : R} (b : R) (h : a ≠ 0) : b / a * a = b := by
-  rw [div_eq, CommRing.mul_assoc, inv_mul h, CommRing.mul_one]
+  rw [div_eq_mul_inv, CommRing.mul_assoc, inv_mul h, CommRing.mul_one]
 
 theorem div_mul_cancel {a : R} (b : R) (h : a ≠ 0) : a * (b / a) = b := by
-  rw [div_eq, CommRing.mul_comm b, ← CommRing.mul_assoc, mul_inv h, CommRing.one_mul]
+  rw [div_eq_mul_inv, CommRing.mul_comm b, ← CommRing.mul_assoc, mul_inv h, CommRing.one_mul]
 
 theorem mul_inv_cancel_left {a b : R} (h : a ≠ 0) : a⁻¹ * (a * b) = b := by
   rw [← CommRing.mul_assoc, inv_mul h, CommRing.one_mul]

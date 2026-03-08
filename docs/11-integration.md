@@ -232,7 +232,7 @@ theorem shift_is_antideriv {F f : R → R}
   · intro x d
     show F (x + d.val) - F 0 = (F x - F 0) + f x * d.val
     rw [hslope x d]
-    rw [sub_eq (F x + f x * d.val), sub_eq (F x)]
+    rw [sub_eq_add_neg (F x + f x * d.val), sub_eq_add_neg (F x)]
     rw [add_assoc, add_comm (f x * d.val) (-(F 0)), ← add_assoc]
 ```
 
@@ -272,12 +272,12 @@ we do step by step in our minimal foundation.
 ```lean
 private theorem sub_sub_cancel_right (a b c : R) : (a - c) - (b - c) = a - b := by
   calc (a - c) - (b - c)
-      = (a - c) + (-(b - c)) := by rw [sub_eq]
+      = (a - c) + (-(b - c)) := by rw [sub_eq_add_neg]
     _ = (a - c) + (c - b) := by rw [neg_sub]
-    _ = (a - c) + (c + -(b)) := by rw [sub_eq c b]
+    _ = (a - c) + (c + -(b)) := by rw [sub_eq_add_neg c b]
     _ = ((a - c) + c) + -(b) := by rw [← add_assoc]
     _ = a + -(b) := by rw [sub_add_cancel]
-    _ = a - b := by rw [← sub_eq]
+    _ = a - b := by rw [← sub_eq_add_neg]
 ```
 
 This is a pure algebra lemma: `(a - c) - (b - c) = a - b`. The `c` terms
@@ -412,7 +412,7 @@ theorem zero_slope_is_const {F : R → R}
     · exact sub_self (F 0)
     · intro x d
       show F (x + d.val) - F 0 = (F x - F 0) + (0 : R) * d.val
-      rw [hslope x d, sub_eq (F x + (0 : R) * d.val), sub_eq (F x)]
+      rw [hslope x d, sub_eq_add_neg (F x + (0 : R) * d.val), sub_eq_add_neg (F x)]
       rw [add_assoc, add_comm ((0 : R) * d.val) (-(F 0)), ← add_assoc]
   have heq := antideriv_unique hH zero_is_antideriv_zero
   intro x
@@ -586,7 +586,7 @@ theorem antideriv_sub {F G : R → R} {f g : R → R}
   · intro x d
     show F (x + d.val) - G (x + d.val) = (F x - G x) + (f x - g x) * d.val
     rw [hF.2 x d, hG.2 x d, sub_mul]
-    rw [sub_eq (F x + f x * d.val), sub_eq (F x), sub_eq (f x * d.val)]
+    rw [sub_eq_add_neg (F x + f x * d.val), sub_eq_add_neg (F x), sub_eq_add_neg (f x * d.val)]
     rw [neg_add_distrib]
     rw [add_assoc, ← add_assoc (f x * d.val),
         add_comm (f x * d.val) (-(G x)),
@@ -610,7 +610,7 @@ The Lean proof just makes every algebraic step explicit.
 ```lean
 theorem integral_additive (F : R → R) (a b c : R) :
     (F b - F a) + (F c - F b) = F c - F a := by
-  rw [add_comm, sub_eq (F b) (F a), ← add_assoc, sub_add_cancel, ← sub_eq]
+  rw [add_comm, sub_eq_add_neg (F b) (F a), ← add_assoc, sub_add_cancel, ← sub_eq_add_neg]
 ```
 
 This is the theorem that, in integral notation, reads:

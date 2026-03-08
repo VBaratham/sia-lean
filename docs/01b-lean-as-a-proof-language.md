@@ -127,9 +127,9 @@ of new statements.
 tracks a "goal" (what you still need to prove) and you chip away at it:
 
     theorem sub_self (a : R) : a - a = 0 := by
-      rw [sub_eq, add_neg]
+      rw [sub_eq_add_neg, add_neg]
 
-Here, Lean starts with the goal `a - a = 0`. The tactic `rw [sub_eq]` rewrites `a - a`
+Here, Lean starts with the goal `a - a = 0`. The tactic `rw [sub_eq_add_neg]` rewrites `a - a`
 to `a + (-a)` (using the definition of subtraction), changing the goal to
 `a + (-a) = 0`. Then `rw [add_neg]` rewrites that to `0 = 0`, which is trivially true.
 Goal closed, proof done.
