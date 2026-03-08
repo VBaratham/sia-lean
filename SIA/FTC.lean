@@ -1,6 +1,8 @@
 /-
   SIA.FTC — The Fundamental Theorem of Calculus
 
+  Based on Bell, Chapter 6.
+
   The two parts of FTC, stated cleanly and connecting derivatives
   (from Derivative.lean) with integration (from Integration.lean):
 

@@ -3,6 +3,8 @@
 
   An ordered field where the ordering is compatible with arithmetic,
   without trichotomy. This is the base algebraic structure for SIA.
+
+  Based on Bell, Chapter 1 (the ordered field structure underlying smooth worlds).
 -/
 import SIA.Algebra
 import SIA.Order

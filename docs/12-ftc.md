@@ -1,5 +1,7 @@
 # Article 12: FTC.lean --- The Fundamental Theorem of Calculus
 
+*Corresponds to Bell, Chapter 6.*
+
 Article 11 built the integration machinery: the definition of antiderivative,
 the integration axiom, both parts of the Fundamental Theorem, linearity, and
 the connection back to microaffinity. All of that lives in `Integration.lean`.

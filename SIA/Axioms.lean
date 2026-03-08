@@ -3,6 +3,8 @@
 
   Defines Delta (nilsquare infinitesimals) and the SIA class, which adds
   the Kock-Lawvere axiom to a constructive ordered field.
+
+  Based on Bell, Chapter 1 (Principle of Microaffineness).
 -/
 import SIA.Field
 

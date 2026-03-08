@@ -7,6 +7,8 @@
   IMPORTANT: We avoid Exists.choose (which uses Classical.choice) by never
   extracting the witness. Instead, all derivative rules are proved by showing
   that a candidate satisfies the microaffinity condition, then using uniqueness.
+
+  Based on Bell, Chapter 2.
 -/
 import SIA.Delta
 

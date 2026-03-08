@@ -1,5 +1,7 @@
 # Article 5: Axioms.lean — The Heart of Smooth Infinitesimal Analysis
 
+*Corresponds to Bell, Chapter 1 (Principle of Microaffineness).*
+
 Everything we have built so far — commutative rings, fields, strict orders,
 constructive ordered fields — has been preparation. This file is where we state
 the axioms that make Smooth Infinitesimal Analysis what it is. It is short (45

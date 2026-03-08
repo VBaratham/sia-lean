@@ -4,6 +4,8 @@
   In SIA, "neighbors" a b means (a - b)² = 0 (i.e., a - b is in Delta).
   We prove every function R → R preserves the neighbor relation.
   We also show the neighbor relation is symmetric but NOT transitive.
+
+  Based on Bell, Chapter 1.
 -/
 import SIA.Delta
 

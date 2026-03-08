@@ -1,5 +1,7 @@
 # Article 3: Order.lean — What Does "Less Than" Mean Without LEM?
 
+*Corresponds to Bell, Chapter 1 (constructive variant of the ordering Bell assumes).*
+
 In Articles 1 and 2, we built a commutative ring and a field from scratch. We have
 addition, multiplication, negation, inverses — all the arithmetic you need for a number
 system. But we don't yet have any notion of *order*. We can't say "a < b" or "a is
@@ -21,11 +23,11 @@ whatsoever. Define:
     a = 0
     b = if P then 0 else 1
 
-By trichotomy applied to a and b, we get three cases:
+By trichotomy applied to a and b, one of three cases must hold:
 
-- `a < b`: then b is not 0, so P must be false
-- `a = b`: then b = 0, so P must be true
-- `b < a`: similar to the first case
+- `a < b`: then `0 < b`, so `b ≠ 0`, so P must be false
+- `a = b`: then `b = 0`, so P must be true
+- `b < a`: impossible, since b is 0 or 1 and a is 0
 
 So for any proposition P, we've decided whether P is true or false. That is exactly
 the Law of the Excluded Middle (LEM). And as we discussed in Article 1, LEM is
@@ -44,7 +46,6 @@ class StrictOrder (R : Type u) extends LT R where
   lt_irrefl : ∀ (a : R), ¬ (a < a)
   lt_trans  : ∀ {a b c : R}, a < b → b < c → a < c
   ne_lt     : ∀ {a b : R}, a ≠ b → a < b ∨ b < a
-  lt_cotrans : ∀ {a b : R}, a < b → ∀ (c : R), a < c ∨ c < b
 ```
 
 Let's go through each piece.
@@ -53,7 +54,7 @@ Let's go through each piece.
 
 `LT R` is a Lean built-in typeclass that gives the type `R` a `<` operator. By
 writing `extends LT R`, we're saying: a `StrictOrder` on `R` provides a `<`
-relation, plus the four axioms that follow. This is the same pattern we saw in
+relation, plus the three axioms that follow. This is the same pattern we saw in
 Article 2 where `CommRing R` extended `Add R`, `Mul R`, etc.
 
 ### `lt_irrefl : ∀ (a : R), ¬ (a < a)`
@@ -88,49 +89,6 @@ You might not have such a proof! For example, for a nilsquare infinitesimal d, y
 can't prove `d = 0` and you can't prove `d ≠ 0`. So `ne_lt` gives you nothing in
 that case, which is exactly what we want — we don't want to be able to compare
 infinitesimals to zero.
-
-### `lt_cotrans : ∀ {a b : R}, a < b → ∀ (c : R), a < c ∨ c < b`
-
-**Cotransitivity.** This is the axiom that replaces trichotomy, and it deserves its
-own section.
-
-## What cotransitivity means
-
-Cotransitivity says: if a < b, then for any third point c, either a < c or c < b
-(or both — constructive "or" allows both to hold).
-
-Picture a number line:
-
-```
-    a-----------b
-```
-
-If you know a < b, and someone hands you any point c, cotransitivity says: c must
-land somewhere that lets you make at least one comparison. Either c is to the right
-of a (giving `a < c`), or c is to the left of b (giving `c < b`), or both:
-
-```
-    a-----c-----b        both a < c and c < b
-    a-----------b---c    a < c (and also c is past b)
-    c---a-------b        c < b (and also c is before a)
-```
-
-In every case, at least one of `a < c` or `c < b` holds.
-
-This is sometimes called **locatedness**: the order is "located" in the sense that
-you can always tell which side of a gap any point falls on. It's a strong enough
-property to make many classical-looking arguments go through, but it doesn't give
-you trichotomy.
-
-Why not? Because cotransitivity only fires when you already have a strict inequality
-`a < b`. If you don't know whether `a < b` or `a = b` or `b < a`, cotransitivity
-tells you nothing. Trichotomy would give you that initial comparison for free, but
-cotransitivity doesn't.
-
-The name "cotransitivity" comes from a duality with transitivity. Transitivity says:
-if you know `a < b` and `b < c`, you can conclude `a < c` — you combine two facts
-to produce one. Cotransitivity goes the other direction: from one fact (`a < b`) and
-one test point (c), you produce a disjunction of two facts (`a < c ∨ c < b`).
 
 ## Opening the namespace
 
@@ -227,110 +185,6 @@ theorem le_of_eq {a b : R} (h : a = b) : a ≤ b :=
 If `a = b`, then `a ≤ b`. We start with `le_refl a : a ≤ a`, and use `h ▸` to
 substitute, yielding `a ≤ b`.
 
-## The cotransitivity proofs — the heart of the file
-
-The next three theorems show how cotransitivity replaces trichotomy in proofs about
-transitivity of ≤. These are worth studying carefully because they demonstrate a
-proof pattern that comes up again and again in constructive order theory.
-
-### le_lt_trans: if a ≤ b and b < c, then a < c
-
-```lean
-theorem le_lt_trans {a b c : R} (hab : a ≤ b) (hbc : b < c) : a < c :=
-  (lt_cotrans hbc a).elim (fun h => (hab h).elim) id
-```
-
-We know `a ≤ b` (i.e., `¬ (b < a)`) and `b < c`. We want to prove `a < c`.
-
-The strategy: use cotransitivity on `b < c` with test point `a`. This gives us:
-
-    lt_cotrans hbc a : b < a ∨ a < c
-
-This is a value of type `Or`, and we need to extract a proof of `a < c` from it. We
-use `.elim`, which is how you do case analysis on `Or` in Lean. The type of `.elim` on
-`Or` is:
-
-    Or.elim : P ∨ Q → (P → R) → (Q → R) → R
-
-It says: "given `P ∨ Q`, if you can handle the case where P holds, and you can handle
-the case where Q holds, then you get R either way." It's like a match statement on
-which branch of the `Or` is active.
-
-So we need two functions: one handling `b < a`, and one handling `a < c`.
-
-**Case 1: `b < a`.** We get `h : b < a`. But we also know `hab : a ≤ b`, which means
-`¬ (b < a)`. So `hab h` applies the negation to the proof, producing `False`. Then
-`False.elim` (written as `.elim`) converts `False` into anything — including `a < c`.
-This is the principle of *ex falso quodlibet*: from a contradiction, you can prove
-anything.
-
-**Case 2: `a < c`.** We get a proof of `a < c`, which is exactly what we wanted. The
-function `id` (the identity function) just returns it unchanged.
-
-Let's walk through the expression tree:
-
-```
-(lt_cotrans hbc a).elim (fun h => (hab h).elim) id
-│                       │                        │
-│                       │                        └─ Case 2: a < c → a < c (identity)
-│                       │
-│                       └─ Case 1: b < a → a < c
-│                          hab h : False  (because hab says ¬(b < a))
-│                          .elim : False → a < c
-│
-└─ b < a ∨ a < c  (from cotransitivity)
-```
-
-### lt_le_trans: if a < b and b ≤ c, then a < c
-
-```lean
-theorem lt_le_trans {a b c : R} (hab : a < b) (hbc : b ≤ c) : a < c :=
-  (lt_cotrans hab c).elim id (fun h => (hbc h).elim)
-```
-
-This is the mirror image. We use cotransitivity on `a < b` with test point `c`:
-
-    lt_cotrans hab c : a < c ∨ c < b
-
-**Case 1: `a < c`.** This is what we want, so `id` returns it.
-
-**Case 2: `c < b`.** We have `h : c < b`. But `hbc : b ≤ c` means `¬ (c < b)`. So
-`hbc h : False`, and `.elim` converts the contradiction to `a < c`.
-
-Notice the symmetry with `le_lt_trans` — the `id` and the contradiction-elimination
-swap sides because the `Or` comes out in a different order.
-
-### le_trans: ≤ is transitive
-
-```lean
-theorem le_trans {a b c : R} (hab : a ≤ b) (hbc : b ≤ c) : a ≤ c :=
-  fun hca => (lt_cotrans hca b).elim hbc hab
-```
-
-We want `a ≤ c`, which means `¬ (c < a)`. So assume `hca : c < a` and derive a
-contradiction.
-
-Use cotransitivity on `c < a` with test point `b`:
-
-    lt_cotrans hca b : c < b ∨ b < a
-
-**Case 1: `c < b`.** This is `h : c < b`. But `hbc : b ≤ c` means `¬ (c < b)`. So
-`hbc h : False`. Contradiction.
-
-**Case 2: `b < a`.** This is `h : b < a`. But `hab : a ≤ b` means `¬ (b < a)`. So
-`hab h : False`. Contradiction.
-
-Both cases are contradictions, so we're done. Notice that this proof doesn't need
-`False.elim` explicitly — the `.elim` on `Or` just needs both branches to produce the
-same type, and since both branches produce `False`, and the goal is `False` (because
-we're inside a proof of a negation `¬ (c < a)`, which is `c < a → False`), it works
-out.
-
-Also notice the elegance here: `hbc` and `hab` are both of type `¬ (something)`,
-which is `something → False`, so they can be passed directly as the branch handlers
-to `.elim`. No `fun` wrappers needed. This is a place where Lean's treatment of
-negation as a function type pays off.
-
 ## The theorem that doesn't exist: le_antisymm
 
 In classical math, if `a ≤ b` and `b ≤ a`, then `a = b`. This is called
@@ -396,9 +250,10 @@ constructive logic, it is not.
 
 This is a core difference between the SIA world and classical real analysis. When you
 work with the reals classically, `≤` is a *partial order* (reflexive, antisymmetric,
-transitive). In SIA, `≤` is reflexive and transitive, but antisymmetry only holds
-behind a double negation. This is not a defect — it's a feature. It reflects the
-genuine underdetermination of order among infinitesimals.
+transitive). In SIA, `≤` is reflexive, but antisymmetry only holds behind a double
+negation. (Transitivity of `≤` can be proved if you add cotransitivity — see the
+[appendix](appendix-cotransitivity.md).) This is not a defect — it's a feature. It
+reflects the genuine underdetermination of order among infinitesimals.
 
 ## Summary of `.elim` patterns
 
@@ -422,16 +277,19 @@ and `h : X`, so `hab h : False`, and `.elim` converts it to whatever type is nee
 
 ## What we've built
 
-This file establishes a strict order on our type R with four axioms
-(irreflexivity, transitivity, apartness, cotransitivity) and derives from them:
+This file establishes a strict order on our type R with three axioms
+(irreflexivity, transitivity, apartness) and derives from them:
 
 - A definition of `≤` as negated strict inequality
 - That `<` implies `≠` (`lt_ne`)
 - That `≤` is reflexive (`le_refl`)
 - That `<` implies `≤` (`le_of_lt`) and `=` implies `≤` (`le_of_eq`)
-- Mixed transitivity: `≤` with `<`, `<` with `≤`, and `≤` with `≤` (`le_lt_trans`,
-  `lt_le_trans`, `le_trans`)
 - That mutual `≤` implies double-negated equality (`le_le_eq_nn`)
+
+A fourth axiom, **cotransitivity** (`a < b → ∀ c, a < c ∨ c < b`), is a standard
+constructive order axiom but is not used by any SIA proof in this project. It lives
+in `extras/Cotransitivity.lean` and is documented in the
+[cotransitivity appendix](appendix-cotransitivity.md).
 
 The next file, `Field.lean`, will connect this order structure with the field
 arithmetic from Article 2, giving us a **constructive ordered field** — the base

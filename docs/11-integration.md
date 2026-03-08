@@ -1,5 +1,7 @@
 # Article 11: Integration.lean --- Integration and the Fundamental Theorem of Calculus
 
+*Corresponds to Bell, Chapter 6.*
+
 In traditional calculus, integration is the culmination of a long journey.
 You define Riemann sums, take limits of increasingly fine partitions, prove
 that the limit exists for well-behaved functions, and then --- after all that

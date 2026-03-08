@@ -4,8 +4,12 @@
   Defines a strict order relation compatible with intuitionistic logic.
   No trichotomy (which would imply LEM), but we have:
   - Irreflexivity, transitivity
-  - Cotransitivity (locatedness): a < b → ∀ c, a < c ∨ c < b
   - Apartness from inequality: a ≠ b → a < b ∨ b < a
+
+  Based on Bell, Chapter 1 (constructive variant of the ordering Bell assumes).
+
+  Note: cotransitivity (a < b → ∀ c, a < c ∨ c < b) is in extras/Cotransitivity.lean.
+  It is not used by any SIA proof and Bell does not list it as an axiom.
   - ≤ defined as ¬ (b < a)
 
   Note: le_antisymm (a ≤ b → b ≤ a → a = b) is NOT provable constructively
@@ -19,7 +23,6 @@ class StrictOrder (R : Type u) extends LT R where
   lt_irrefl : ∀ (a : R), ¬ (a < a)
   lt_trans  : ∀ {a b c : R}, a < b → b < c → a < c
   ne_lt     : ∀ {a b : R}, a ≠ b → a < b ∨ b < a
-  lt_cotrans : ∀ {a b : R}, a < b → ∀ (c : R), a < c ∨ c < b
 
 namespace StrictOrder
 
@@ -39,17 +42,6 @@ theorem le_of_lt {a b : R} (h : a < b) : a ≤ b :=
 
 theorem le_of_eq {a b : R} (h : a = b) : a ≤ b :=
   h ▸ le_refl a
-
--- Use cotransitivity: from b < c and point a, get b < a ∨ a < c
-theorem le_lt_trans {a b c : R} (hab : a ≤ b) (hbc : b < c) : a < c :=
-  (lt_cotrans hbc a).elim (fun h => (hab h).elim) id
-
--- Use cotransitivity: from a < b and point c, get a < c ∨ c < b
-theorem lt_le_trans {a b c : R} (hab : a < b) (hbc : b ≤ c) : a < c :=
-  (lt_cotrans hab c).elim id (fun h => (hbc h).elim)
-
-theorem le_trans {a b c : R} (hab : a ≤ b) (hbc : b ≤ c) : a ≤ c :=
-  fun hca => (lt_cotrans hca b).elim hbc hab
 
 -- We can prove double-negated equality from ≤ in both directions
 theorem le_le_eq_nn {a b : R} (hab : a ≤ b) (hba : b ≤ a) : ¬¬ (a = b) :=

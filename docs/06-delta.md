@@ -1,5 +1,7 @@
 # Article 6: Delta.lean — The Main Theorems
 
+*Corresponds to Bell, Chapter 1.*
+
 This is the heart of the formalization. Everything we built in the previous articles
 -- the commutative ring, the field, the constructive order, the Kock-Lawvere axiom --
 was scaffolding for the theorems in this file. Here we prove the deepest results of

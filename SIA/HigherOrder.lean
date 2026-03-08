@@ -1,6 +1,8 @@
 /-
   SIA.HigherOrder — Higher-order infinitesimals
 
+  Based on Bell, Chapter 7.
+
   Defines natural number exponentiation, natural number embedding into R,
   and Delta_k (k-th order nilpotent infinitesimals: elements d where d^(k+1) = 0).
 

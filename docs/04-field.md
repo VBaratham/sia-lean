@@ -1,5 +1,7 @@
 # Article 4: Field.lean — Connecting Order with Arithmetic
 
+*Corresponds to Bell, Chapter 1.*
+
 ## Where we are
 
 In Article 2, we built `CommRing` (addition, multiplication, negation, and all the

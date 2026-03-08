@@ -8,6 +8,8 @@
   - LEM is refutable on Delta
   - Microcancellation
   - Microaffinity (every function R → R has a unique derivative)
+
+  Based on Bell, Chapter 1.
 -/
 import SIA.Axioms
 

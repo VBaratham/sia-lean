@@ -4,6 +4,8 @@
   We define CommRing and Field from scratch, since Lean 4 without Mathlib
   only provides the operation typeclasses (Add, Mul, etc.) but no algebraic
   structure classes.
+
+  Not directly from Bell — this is prerequisite infrastructure that Bell assumes.
 -/
 
 universe u

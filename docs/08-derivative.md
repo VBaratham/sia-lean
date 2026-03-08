@@ -1,5 +1,7 @@
 # Article 8: Derivative.lean --- Derivatives Without Limits
 
+*Corresponds to Bell, Chapter 2.*
+
 This is the file the entire project has been building toward. In Article 1,
 we promised that SIA gives you derivatives without limits, without
 epsilon-delta arguments, without careful estimation. This file delivers on

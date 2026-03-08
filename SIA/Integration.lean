@@ -1,6 +1,8 @@
 /-
   SIA.Integration — Integration and the Fundamental Theorem of Calculus
 
+  Based on Bell, Chapter 6.
+
   In SIA, integration is characterized by the integration axiom: every function
   f : R → R has a unique antiderivative F with F(0) = 0 and slope f(x) at every x.
 

@@ -1,5 +1,7 @@
 # Article 7: Continuity.lean — Every Function Is Continuous
 
+*Corresponds to Bell, Chapter 1.*
+
 ## The punchline, up front
 
 In a standard calculus course, continuity is something you *check*. You are given a

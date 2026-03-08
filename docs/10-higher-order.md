@@ -1,5 +1,7 @@
 # Article 10: HigherOrder.lean --- Higher-Order Infinitesimals
 
+*Corresponds to Bell, Chapter 7.*
+
 So far, every infinitesimal in the project has been **nilsquare**: an element
 `d` whose square is zero. That single condition --- `d * d = 0` --- powered
 all of our results. The Kock-Lawvere axiom says every function on nilsquare
