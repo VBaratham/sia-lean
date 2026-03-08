@@ -123,6 +123,8 @@ theorem neg_sub (a b : R) : -(a - b) = b - a := by
 
 end CommRing
 
+-- Note: a standard field also requires 0 ≠ 1 (nontriviality). We omit this
+-- because ConstructiveOrderedField provides it via zero_lt_one.
 class CField (R : Type u) extends CommRing R, Inv R, Div R where
   div_eq_mul_inv : ∀ (a b : R), a / b = a * b⁻¹
   mul_inv     : ∀ {a : R}, a ≠ 0 → a * a⁻¹ = 1

@@ -790,6 +790,12 @@ This file establishes two algebraic structures:
    (via commutativity) and theorems about inverse nonzero-ness and division
    cancellation.
 
+**A note on nontriviality.** A standard field definition also requires `0 ≠ 1` — without
+this, the trivial ring {0} (where 0 = 1) satisfies all the axioms, since `mul_inv` is
+vacuously true when no element is nonzero. We could add this as a `CField` axiom but
+don't need to: in the next article, `ConstructiveOrderedField` provides `0 < 1`, which
+implies `0 ≠ 1`.
+
 None of this mentions infinitesimals, derivatives, or anything specific to SIA. This
 is pure algebraic infrastructure — the foundation that everything else builds on. In
 the next article, we will add ordering (less-than, greater-than) to our number system,
