@@ -131,6 +131,41 @@ This project formalizes SIA in Lean 4. We:
    theorem depends on. We check that none of our theorems use `Classical.choice`
    (which is the axiom that gives you LEM in Lean).
 
+## Highlights: the most interesting proofs
+
+The first several files build algebraic infrastructure (rings, fields, ordering).
+That's necessary groundwork, but the real payoff starts in `Delta.lean`. Here
+are some highlights:
+
+**Infinitesimals are neither positive nor negative.** (`delta_near_zero` in
+Delta.lean) An infinitesimal d satisfies both 0 ≤ d and d ≤ 0 — it is neither
+provably positive nor provably negative. Yet it's not provably zero either.
+This is the first sign that SIA's number line is genuinely different from the
+classical one.
+
+**LEM is provably false.** (`not_lem_on_delta` in Delta.lean) We don't just
+avoid classical logic — we prove it's *incompatible* with the axioms. The proof
+chains together several results: if you could decide whether each infinitesimal
+is zero, they'd all have to be zero, contradicting nondegeneracy of Delta.
+
+**Every function has a derivative.** (`microaffinity` in Delta.lean) The
+Kock-Lawvere axiom immediately gives us: for any f : R → R and any point x,
+there exists a unique slope. No smoothness assumption, no limits, no
+epsilon-delta arguments. Derivatives exist for free.
+
+**The product rule is trivial.** (`deriv_mul_slope` in Derivative.lean) Expand
+f(x+d)·g(x+d) using microaffinity: (f(x) + a·d)(g(x) + b·d) = f(x)·g(x) +
+(a·g(x) + f(x)·b)·d + a·b·d². The last term vanishes because d² = 0.
+That's it — the product rule falls out of the algebra.
+
+**Every function is continuous.** (`all_continuous` in Continuity.lean) Not
+"every differentiable function" — *every* function. If x and y differ by an
+infinitesimal, then f(x) and f(y) differ by an infinitesimal. This follows
+directly from microaffinity.
+
+**The Fundamental Theorem of Calculus.** (`ftc1`, `ftc2` in FTC.lean)
+Both directions, proved without limits, measure theory, or Riemann sums.
+
 ## The files, in order
 
 The rest of these articles walk through each file line by line:

@@ -12,8 +12,9 @@ distributivity. In standard math, you might just say "let R be a field" and move
 In Lean, we have to spell out exactly what that means — every axiom, every operation,
 every compatibility condition.
 
-This article walks through `SIA/Algebra.lean` line by line. We will explain every piece
-of Lean syntax as it comes up, so no prior Lean knowledge is required.
+This article walks through `SIA/Algebra.lean` line by line. We explain Lean syntax as
+it comes up, but if you're new to Lean, reading [Article 1b](01b-lean-as-a-proof-language.md)
+and [Article 1c](01c-reading-lean-proofs.md) first will make this much easier.
 
 ## Why build from scratch?
 
@@ -228,65 +229,29 @@ Together, this `variable` line means: "Everything below works for any type `R` t
 is a commutative ring, and Lean should figure out `R` and its ring structure
 automatically from context."
 
-### The `attribute [simp]` declaration
+### Commutativity-derived theorems
 
 ```lean
-attribute [simp] add_zero zero_add add_neg neg_add mul_one one_mul mul_zero zero_mul
-                 neg_neg neg_zero
+-- Derived via commutativity
+theorem zero_add (a : R) : 0 + a = a := by rw [add_comm, add_zero]
+theorem neg_add (a : R) : (-a) + a = 0 := by rw [add_comm, add_neg]
+theorem one_mul (a : R) : 1 * a = a := by rw [mul_comm, mul_one]
+theorem right_distrib (a b c : R) : (a + b) * c = a * c + b * c := by
+  rw [mul_comm, left_distrib, mul_comm c a, mul_comm c b]
 ```
 
-This line registers a collection of lemmas as **simplification lemmas**. The `simp`
-tactic in Lean is an automated simplifier — it repeatedly applies a set of rewrite
-rules to try to reduce an expression to a simpler form. By marking `add_zero` as a
-simp lemma, we are telling Lean: "Whenever you see `a + 0`, you can simplify it to
-`a`."
+These are the first theorems in the file, and they all follow the same pattern: use
+commutativity to flip the operands, then apply the corresponding axiom. Each one is
+the "mirror image" of an axiom:
 
-The lemmas chosen here are all of the form "something complicated equals something
-simpler": `a + 0` simplifies to `a`, `a * 1` simplifies to `a`, `-(-a)` simplifies
-to `a`, and so on. Some of these are axioms (`add_zero`, `add_neg`, `mul_one`) and
-some are derived theorems (`zero_add`, `neg_add`, `one_mul`, `mul_zero`, `zero_mul`,
-`neg_neg`, `neg_zero`), but Lean treats them identically once they are registered.
+- `zero_add` (`0 + a = a`) from `add_zero` (`a + 0 = a`)
+- `neg_add` (`(-a) + a = 0`) from `add_neg` (`a + (-a) = 0`)
+- `one_mul` (`1 * a = a`) from `mul_one` (`a * 1 = a`)
+- `right_distrib` (`(a + b) * c = a*c + b*c`) from `left_distrib` (`a * (b + c) = a*b + a*c`)
 
-### Derived lemma: `sub_self`
-
-```lean
-@[simp] theorem sub_self (a : R) : a - a = 0 := by
-  rw [sub_eq, add_neg]
-```
-
-This is a **derived lemma** — a theorem proved from the axioms, rather than
-assumed. Let's read every part of this line.
-
-`@[simp]` is an **attribute annotation**. It does the same thing as the `attribute
-[simp]` line above, but for a single theorem. It registers `sub_self` as a
-simplification rule: whenever Lean sees `a - a`, it can simplify to `0`.
-
-`theorem` introduces a theorem (or lemma — Lean does not distinguish between the two
-keywords `theorem` and `lemma`).
-
-`sub_self` is the name of the theorem.
-
-`(a : R)` is an explicit argument: this theorem takes an element `a` of type `R`.
-
-`: a - a = 0` is the statement: "a minus a equals zero."
-
-`:= by` begins the proof. The keyword `by` switches Lean into **tactic mode**. In
-tactic mode, you give step-by-step instructions for building the proof, rather than
-writing the proof term directly. Think of it like giving directions ("turn left, then
-go straight") rather than specifying the destination's GPS coordinates.
-
-Now the proof itself:
-
-- `rw [sub_eq]` — The `rw` tactic stands for **rewrite**. It takes a lemma and
-  replaces the left-hand side with the right-hand side wherever it appears in the goal.
-  Here, `sub_eq` says `a - b = a + (-b)`, so `rw [sub_eq]` transforms the goal
-  from `a - a = 0` to `a + (-a) = 0`.
-
-- `rw [add_neg]` — Now `add_neg` says `a + (-a) = 0`, so this rewrite transforms
-  `a + (-a) = 0` into `0 = 0`, which Lean accepts as trivially true.
-
-That is the pattern for most proofs in this file: rewrite using known facts until the
-goal becomes trivially true.
+The `right_distrib` proof is slightly more involved — after flipping the outer
+multiplication, it also needs to flip each term on the right-hand side back to the
+desired order.
 
 ### Cancellation lemmas
 
@@ -318,6 +283,49 @@ theorem add_neg_cancel_left (a b : R) : a + (-a + b) = b := by
 ```
 
 Same idea: regroup, cancel `a + (-a)` to `0`, then drop the `0 +`.
+
+### Left cancellation
+
+```lean
+theorem add_left_cancel {a b c : R} (h : a + b = a + c) : b = c := by
+  have : -a + (a + b) = -a + (a + c) := by rw [h]
+  rw [neg_add_cancel_left, neg_add_cancel_left] at this
+  exact this
+```
+
+If `a + b = a + c`, then `b = c`. You can cancel from the left. The proof adds `-a`
+to both sides. (The `have :` without a name creates an anonymous hypothesis; Lean calls
+it `this`.)
+
+The `at this` syntax tells `rw` to rewrite in the hypothesis `this` rather than in the
+goal. After the two rewrites, `this` becomes `b = c`, and `exact this` finishes the
+proof.
+
+Notice this comes right after the cancellation lemmas, because `add_left_cancel` depends
+on `neg_add_cancel_left`. It is also used in the very next proof, `mul_zero`.
+
+### Derived: `mul_zero` and `zero_mul`
+
+```lean
+-- Derived: mul_zero (a * 0 + a * 0 = a * (0 + 0) = a * 0 = a * 0 + 0, cancel)
+theorem mul_zero (a : R) : a * 0 = 0 :=
+  add_left_cancel (by rw [add_zero, ← left_distrib, add_zero] :
+    a * 0 + a * 0 = a * 0 + 0)
+
+theorem zero_mul (a : R) : 0 * a = 0 := by rw [mul_comm, mul_zero]
+```
+
+These theorems show that zero annihilates any product. Unlike properties such as
+`add_zero` and `mul_one`, these are *not* axioms — they are derived from the ring
+axioms using `add_left_cancel`.
+
+The proof of `mul_zero` is compact. It uses `add_left_cancel` to conclude
+`a * 0 = 0` from the fact that `a * 0 + a * 0 = a * 0 + 0`. The parenthesized
+`by` block proves this fact: `a * 0 + a * 0 = a * (0 + 0)` by `left_distrib`
+(backwards), then `a * (0 + 0) = a * 0` by `add_zero`, then `a * 0 = a * 0 + 0`
+by `add_zero` (backwards).
+
+`zero_mul` follows immediately from `mul_zero` and commutativity.
 
 ### Uniqueness of negation
 
@@ -353,6 +361,112 @@ Walking through it:
 5. `(-a) + 0 = -a` — Drop the zero using `add_zero`.
 
 The chain shows `b = -a`, which is exactly what we wanted to prove.
+
+`neg_unique` is a workhorse — several of the following proofs use it to show that
+something equals a negation by demonstrating it sums to zero.
+
+### Derived: `neg_neg` and `neg_zero`
+
+```lean
+theorem neg_neg (a : R) : -(-a) = a :=
+  (neg_unique (neg_add a)).symm
+
+theorem neg_zero : (-0 : R) = 0 :=
+  (neg_unique (add_zero 0)).symm
+```
+
+Both of these use `neg_unique` to derive facts about negation.
+
+`neg_neg` says double negation cancels: `-(-a) = a`. The proof observes that
+`(-a) + a = 0` (by `neg_add`), so by `neg_unique`, `a = -(-a)`. The `.symm` flips
+the equality to the desired direction.
+
+`neg_zero` says the negation of zero is zero: `-0 = 0`. The proof observes that
+`0 + 0 = 0` (by `add_zero`), so by `neg_unique`, `0 = -0`. Again, `.symm` flips it.
+
+### Derived: `neg_mul_left` and `neg_mul_right`
+
+```lean
+theorem neg_mul_left (a b : R) : -(a * b) = (-a) * b :=
+  (neg_unique (by rw [← right_distrib, add_neg, zero_mul])).symm
+
+theorem neg_mul_right (a b : R) : -(a * b) = a * (-b) := by
+  rw [mul_comm, neg_mul_left, mul_comm]
+```
+
+These theorems say that negation can be "pulled into" a product on either side:
+`-(a * b)` equals both `(-a) * b` and `a * (-b)`.
+
+The proof of `neg_mul_left` uses `neg_unique`: it shows that
+`a*b + (-a)*b = (a + (-a))*b = 0*b = 0`, so `(-a)*b` must be `-(a*b)`.
+
+`neg_mul_right` derives from `neg_mul_left` and commutativity.
+
+### The `attribute [simp]` declaration
+
+```lean
+attribute [simp] add_zero zero_add add_neg neg_add mul_one one_mul mul_zero zero_mul
+                 neg_neg neg_zero
+```
+
+This line registers a collection of lemmas as **simplification lemmas**. The `simp`
+tactic in Lean is an automated simplifier — it repeatedly applies a set of rewrite
+rules to try to reduce an expression to a simpler form. By marking `add_zero` as a
+simp lemma, we are telling Lean: "When the `simp` tactic is invoked, `a + 0`
+can be simplified to `a`."
+
+The lemmas chosen here are all of the form "something complicated equals something
+simpler": `a + 0` simplifies to `a`, `a * 1` simplifies to `a`, `-(-a)` simplifies
+to `a`, and so on. Some of these are axioms (`add_zero`, `add_neg`, `mul_one`) and
+some are derived theorems (`zero_add`, `neg_add`, `one_mul`, `mul_zero`, `zero_mul`,
+`neg_neg`, `neg_zero`), but Lean treats them identically once they are registered.
+
+Note that this declaration comes *after* all the theorems it references have been
+proved. In the code, the commutativity-derived theorems, cancellation lemmas,
+`mul_zero`/`zero_mul`, `neg_unique`, `neg_neg`, `neg_zero`, and the `neg_mul` lemmas
+all precede this line.
+
+### Derived lemma: `sub_self`
+
+```lean
+@[simp] theorem sub_self (a : R) : a - a = 0 := by
+  rw [sub_eq, add_neg]
+```
+
+This is a **derived lemma** — a theorem proved from the axioms, rather than
+assumed. Let's read every part of this line.
+
+`@[simp]` is an **attribute annotation**. It does the same thing as the `attribute
+[simp]` line above, but for a single theorem. It registers `sub_self` as a
+simplification rule: whenever Lean sees `a - a`, it can simplify to `0`.
+
+`theorem` introduces a theorem (or lemma — Lean does not distinguish between the two
+keywords `theorem` and `lemma`).
+
+`sub_self` is the name of the theorem.
+
+`(a : R)` is an explicit argument: this theorem takes an element `a` of type `R`.
+
+`: a - a = 0` is the statement: "a minus a equals zero."
+
+`:= by` begins the proof. The keyword `by` switches Lean into **tactic mode**. In
+tactic mode, you give step-by-step instructions for building the proof, rather than
+writing the proof term directly. Think of it like giving directions ("turn left, then
+go straight") rather than specifying the destination's GPS coordinates.
+
+Now the proof itself:
+
+- `rw [sub_eq]` — The `rw` tactic stands for **rewrite**. It takes a lemma and
+  finds the first occurrence of the left-hand side in the goal and replaces it
+  with the right-hand side.
+  Here, `sub_eq` says `a - b = a + (-b)`, so `rw [sub_eq]` transforms the goal
+  from `a - a = 0` to `a + (-a) = 0`.
+
+- `rw [add_neg]` — Now `add_neg` says `a + (-a) = 0`, so this rewrite transforms
+  `a + (-a) = 0` into `0 = 0`, which Lean accepts as trivially true.
+
+That is the pattern for most proofs in this file: rewrite using known facts until the
+goal becomes trivially true.
 
 ### Negation distributes over addition
 
@@ -404,7 +518,7 @@ theorem neg_mul_neg (a b : R) : (-a) * (-b) = a * b := by
     _ = a * b := by rw [neg_neg]
 ```
 
-A negative times a negative is positive. The proof uses the axioms about pulling
+A negative times a negative is positive. The proof uses the theorems about pulling
 negation signs into and out of products, then cancels the double negation.
 
 ### Subtraction and multiplication
@@ -421,22 +535,7 @@ These distribute multiplication over subtraction. The proofs expand subtraction 
 "add the negative" (using `sub_eq`), apply distributivity, then fold a negation back
 into the product.
 
-### Additive cancellation
-
-```lean
-theorem add_left_cancel {a b c : R} (h : a + b = a + c) : b = c := by
-  have : -a + (a + b) = -a + (a + c) := by rw [h]
-  rw [neg_add_cancel_left, neg_add_cancel_left] at this
-  exact this
-```
-
-If `a + b = a + c`, then `b = c`. You can cancel from the left. The proof adds `-a`
-to both sides. (The `have :` without a name creates an anonymous hypothesis; Lean calls
-it `this`.)
-
-The `at this` syntax tells `rw` to rewrite in the hypothesis `this` rather than in the
-goal. After the two rewrites, `this` becomes `b = c`, and `exact this` finishes the
-proof.
+### Right cancellation
 
 ```lean
 theorem add_right_cancel {a b c : R} (h : a + c = b + c) : a = b := by
@@ -445,11 +544,15 @@ theorem add_right_cancel {a b c : R} (h : a + c = b + c) : a = b := by
   exact this
 ```
 
-Same idea, canceling from the right. The proof adds `-c` to both sides and simplifies.
-Notice the chain of rewrites: `add_assoc` regroups, `add_neg` cancels `c + (-c)` to
-`0`, and `add_zero` drops the zero. This chain is applied to both sides (Lean applies
-each rewrite to the first match it finds, working through both sides of the equation
-in `this`).
+Same idea as `add_left_cancel`, but canceling from the right. The proof adds `-c`
+to both sides and simplifies. Notice the chain of rewrites: `add_assoc` regroups,
+`add_neg` cancels `c + (-c)` to `0`, and `add_zero` drops the zero. This chain is
+applied to both sides (Lean applies each rewrite to the first match it finds, working
+through both sides of the equation in `this`).
+
+In the code, `add_right_cancel` appears after `mul_sub`/`sub_mul` rather than next to
+`add_left_cancel`. This is because `add_right_cancel` is not needed by any of the
+intervening proofs — it is placed where it is first used later in the codebase.
 
 ### Subtraction and addition cancellation
 
@@ -580,6 +683,19 @@ variable {R : Type u} [CField R]
 ```
 
 Same pattern as before: open a namespace, declare that `R` is a `CField`.
+
+### Inverse times element: `inv_mul`
+
+```lean
+theorem inv_mul {a : R} (h : a ≠ 0) : a⁻¹ * a = 1 := by
+  rw [CommRing.mul_comm, mul_inv h]
+```
+
+The first derived theorem in the CField namespace. The axiom `mul_inv` gives us
+`a * a⁻¹ = 1` (element times its inverse). Here we derive the reverse order:
+`a⁻¹ * a = 1`. The proof is a one-liner — swap the multiplication using commutativity,
+then apply the axiom. This is the same pattern as `zero_add` from `add_zero` and
+`one_mul` from `mul_one` in the CommRing section.
 
 ### The inverse of a nonzero element is nonzero
 

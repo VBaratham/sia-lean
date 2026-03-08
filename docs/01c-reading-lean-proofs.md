@@ -356,6 +356,10 @@ You can also give `simp` extra lemmas: `simp [foo, bar]` uses `foo` and `bar`
 in addition to the registered `@[simp]` lemmas. You'll see this in the project
 for routine cleanup that would take several `rw` steps to spell out.
 
+Under the hood, `simp` just loops: scan for a matching lemma, rewrite, repeat
+until nothing changes. The `@[simp]` lemmas must always go from "complex" to
+"simple" — if both directions were registered, `simp` would loop forever.
+
 ---
 
 ## Reading term-mode proofs
