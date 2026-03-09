@@ -304,9 +304,17 @@ SIA.ExistsUnique fun (b : R) => ...
 ```
 
 There exists exactly one element `b` of `R` satisfying the property that
-follows. The `fun (b : R) => ...` builds a predicate — a function from `R` to
-`Prop` — and `ExistsUnique` says exactly one `b` makes it true. This uses the
-`ExistsUnique` we defined earlier in this very file.
+follows. Recall that `ExistsUnique` takes a predicate `p : α → Prop` and
+expands to `∃ x, p x ∧ ∀ y, p y → y = x`. Here, `fun (b : R) => ...` *is*
+that predicate — it's an anonymous function that takes a `b` and returns a
+proposition about it. So Lean substitutes it in for `p`, producing:
+
+```
+∃ b, (∀ d, f d = f 0 + b * d.val) ∧ ∀ y, (∀ d, f d = f 0 + y * d.val) → y = b
+```
+
+"There exists a `b` such that the equation holds, and any `y` satisfying the
+same equation equals `b`."
 
 **Layer 3: "...for all d in Delta, f(d) = f(0) + b * d."**
 
