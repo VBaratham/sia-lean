@@ -143,9 +143,8 @@ axioms, the order, and the Kock-Lawvere axiom, plus the integration axiom on
 top.
 
 Notice the `end SIA` before the class definition. As we discussed in Article 5,
-this is a Lean technicality: you cannot define a class inside a namespace that
-shares part of its name. The namespace is reopened immediately after the
-definition.
+this avoids the class getting the redundant name `SIA.SIAIntegral`. The
+namespace is reopened immediately after the definition.
 
 ```lean
 namespace SIA

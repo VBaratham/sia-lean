@@ -247,9 +247,8 @@ simplification engine to use this fact automatically whenever it encounters
 end SIA
 ```
 
-We close the `SIA` namespace before defining the `SIA` class itself. This is a
-technical requirement in Lean: you cannot define a class named `SIA` while
-inside the `SIA` namespace, because Lean would interpret the name as
+We close the `SIA` namespace before defining the `SIA` class itself. We could
+define it inside the namespace, but then its fully qualified name would be
 `SIA.SIA`. By closing the namespace first, the class gets the clean name `SIA`.
 
 ---
@@ -298,16 +297,18 @@ infinitesimal) and whose output is an element of R. No assumptions about
 continuity, differentiability, smoothness, or anything else. Just: any function
 at all.
 
-**Layer 2: "...there exists a unique b in R..."**
+**Layer 2: "...there exists a unique b in R such that..."**
 
 ```lean
 SIA.ExistsUnique fun (b : R) => ...
 ```
 
 There exists exactly one element `b` of `R` satisfying the property that
-follows. This uses the `ExistsUnique` we defined earlier in this very file.
+follows. The `fun (b : R) => ...` builds a predicate — a function from `R` to
+`Prop` — and `ExistsUnique` says exactly one `b` makes it true. This uses the
+`ExistsUnique` we defined earlier in this very file.
 
-**Layer 3: "...such that for all d in Delta, f(d) = f(0) + b * d."**
+**Layer 3: "...for all d in Delta, f(d) = f(0) + b * d."**
 
 ```lean
 ∀ (d : SIA.Delta R), f d = f 0 + b * d.val

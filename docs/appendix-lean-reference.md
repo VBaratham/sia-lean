@@ -43,3 +43,32 @@ Note: when the goal type is already `False` (e.g., inside a proof of `¬ P`),
 you don't need `.elim` — you can just produce the `False` value directly.
 That's why `le_le_eq_nn` doesn't use `False.elim`: both branches of the
 `Or.elim` return `False`, which is already the goal type.
+
+---
+
+## `intro` — peeling off assumptions
+
+The `intro` tactic works on any goal of the form `X → Y`. It moves `X` from
+the goal into the context as a hypothesis, leaving `Y` as the new goal.
+
+```
+Goal before:   X → Y
+              intro h
+Goal after:    Y     (with h : X in context)
+```
+
+This is the tactic version of writing `fun (h : X) => ...` — both construct a
+function from `X` to `Y` by assuming you have an `X` and building a `Y`.
+
+Two common special cases are really just instances of this pattern:
+
+**Negation.** A goal `¬ P` is definitionally `P → False`. So `intro h` assumes
+`h : P` and leaves the goal as `False`. You then derive a contradiction.
+
+**Less-than-or-equal.** A goal `a ≤ b` is definitionally `¬(b < a)`, which is
+`b < a → False`. So `intro h` assumes `h : b < a` and leaves the goal as
+`False`.
+
+In both cases, `intro` isn't doing anything special — it's just peeling off the
+left side of an implication. The fact that `¬ P` and `a ≤ b` are implications
+in disguise is what makes it work.

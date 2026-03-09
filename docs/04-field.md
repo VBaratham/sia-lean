@@ -450,10 +450,10 @@ immediately. That's what `hc c_neg` does -- it applies the negation to the proof
 producing `False`.
 
 **Case 3b: `c > 0`.** This is the substantial case. We know `c > 0` and
-`c * b < c * a`, and we need a contradiction with `a ≤ b` (i.e., `¬(b < a)`).
+`c * b < c * a`, and we need to derive `False`.
 
 The strategy is: multiply both sides of `c * b < c * a` by `c⁻¹` to "cancel" the `c`
-and recover `b < a`.
+and recover `b < a`. Then applying `hab : b < a → False` to it gives `False`.
 
 ```lean
 have inv_pos : 0 < c⁻¹ := by
