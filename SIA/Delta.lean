@@ -44,11 +44,11 @@ theorem mul_delta_sq (d : Delta R) (a : R) : (d.val * a) * (d.val * a) = 0 := by
     _ = 0 := by rw [zero_mul]
 
 -- Delta elements are "between" 0 and 0
-theorem delta_near_zero (d : Delta R) : (0 : R) ≤ d.val ∧ d.val ≤ 0 := by
+theorem delta_near_zero (d : Delta R) : 0 ≤ d.val ∧ d.val ≤ 0 := by
   constructor
   · -- 0 ≤ d.val, i.e., ¬ (d.val < 0)
     intro h_neg
-    have h_pos_neg : (0 : R) < -d.val := neg_pos h_neg
+    have h_pos_neg : 0 < -d.val := neg_pos h_neg
     have h1 : (-d.val) * 0 < (-d.val) * (-d.val) :=
       lt_mul_pos_left h_pos_neg h_pos_neg
     rw [mul_zero, neg_mul_neg] at h1
@@ -80,7 +80,7 @@ theorem microaffinity (f : R → R) (x : R) :
 -- Delta is non-degenerate: not all elements are equal
 theorem delta_nondegenerate : ¬ (∀ (x y : Delta R), x.val = y.val) := by
   intro deg
-  have d_eq_zero : ∀ (d : Delta R), (0 : R) = d.val := fun d => deg 0 d
+  have d_eq_zero : ∀ (d : Delta R), 0 = d.val := fun d => deg 0 d
   let f : R → R := id
   have micro := microaffinity f 0
   have pf_zero : ∀ (d : Delta R), f (0 + d.val) = f 0 + 0 * d.val := by

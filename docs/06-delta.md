@@ -84,9 +84,8 @@ theorem mul_delta_sq (d : Delta R) (a : R) : (d.val * a) * (d.val * a) = 0 := by
 ```
 
 If `d` is in Delta and `a` is any element of R, then `d * a` is also in Delta. The
-idea is simple: `(d*a)^2 = d^2 * a^2 = 0 * a^2 = 0`. But we are working in a
-non-commutative-until-proven-commutative setting (actually our ring IS commutative,
-but the proof is instructive about how Lean handles algebraic manipulation).
+idea is simple: `(d*a)² = d² * a² = 0 * a² = 0`. The `calc` block shuffles the
+terms until `d * d` appears, then substitutes in `d * d = 0`.
 
 The `calc` block is a chain of equalities. Each step rewrites the expression using
 one algebraic law:
