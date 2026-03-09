@@ -302,7 +302,7 @@ Here's a simplified version of a proof from `Delta.lean`. Don't worry about
 what `Delta` means yet — focus on the structure:
 
 ```lean
-theorem delta_near_zero (d : Delta R) : (0 : R) ≤ d.val ∧ d.val ≤ 0 := by
+theorem delta_near_zero (d : Delta R) : 0 ≤ d.val ∧ d.val ≤ 0 := by
   constructor
   · -- first goal: 0 ≤ d.val  (which means ¬(d.val < 0))
     intro h_neg

@@ -104,7 +104,7 @@ up next to each other, allowing us to use `d * d = 0`.
 ## Infinitesimals are between 0 and 0
 
 ```lean
-theorem delta_near_zero (d : Delta R) : (0 : R) ≤ d.val ∧ d.val ≤ 0 := by
+theorem delta_near_zero (d : Delta R) : 0 ≤ d.val ∧ d.val ≤ 0 := by
 ```
 
 This is the formal statement that every infinitesimal is "infinitely small." It says
@@ -120,7 +120,7 @@ that b is strictly less than a." So `0 ≤ d` means "d is not strictly negative"
   constructor
   · -- 0 ≤ d.val, i.e., ¬ (d.val < 0)
     intro h_neg
-    have h_pos_neg : (0 : R) < -d.val := neg_pos h_neg
+    have h_pos_neg : 0 < -d.val := neg_pos h_neg
     have h1 : (-d.val) * 0 < (-d.val) * (-d.val) :=
       lt_mul_pos_left h_pos_neg h_pos_neg
     rw [mul_zero, neg_mul_neg] at h1
@@ -231,7 +231,7 @@ we would get no useful information.
 
 ```lean
   intro deg
-  have d_eq_zero : ∀ (d : Delta R), (0 : R) = d.val := fun d => deg 0 d
+  have d_eq_zero : ∀ (d : Delta R), 0 = d.val := fun d => deg 0 d
 ```
 
 Assume for contradiction that all Delta elements are equal. Since 0 is in Delta,

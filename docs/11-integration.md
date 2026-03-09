@@ -340,7 +340,7 @@ integration.
 ### The zero function is an antiderivative of zero
 
 ```lean
-theorem zero_is_antideriv_zero : IsAntideriv (fun (_ : R) => (0 : R)) (fun (_ : R) => (0 : R)) := by
+theorem zero_is_antideriv_zero : IsAntideriv (fun (_ : R) => 0) (fun (_ : R) => 0) := by
   constructor
   · rfl
   · intro x d; rw [zero_mul, add_zero]
@@ -357,7 +357,7 @@ the goal closes.
 ```lean
 theorem zero_slope_is_zero {F : R → R}
     (hF0 : F 0 = 0)
-    (hslope : ∀ (x : R) (d : Delta R), F (x + d.val) = F x + (0 : R) * d.val) :
+    (hslope : ∀ (x : R) (d : Delta R), F (x + d.val) = F x + 0 * d.val) :
     F = fun _ => 0 := by
   have hF : IsAntideriv F (fun _ => 0) := ⟨hF0, fun x d => hslope x d⟩
   exact antideriv_unique hF zero_is_antideriv_zero
@@ -373,15 +373,15 @@ antiderivative of the zero function (by the previous lemma). By uniqueness,
 
 ```lean
 theorem zero_slope_is_const {F : R → R}
-    (hslope : ∀ (x : R) (d : Delta R), F (x + d.val) = F x + (0 : R) * d.val) :
+    (hslope : ∀ (x : R) (d : Delta R), F (x + d.val) = F x + 0 * d.val) :
     ∀ (x : R), F x = F 0 := by
   have hH : IsAntideriv (fun x => F x - F 0) (fun _ => 0) := by
     constructor
     · exact sub_self (F 0)
     · intro x d
-      show F (x + d.val) - F 0 = (F x - F 0) + (0 : R) * d.val
-      rw [hslope x d, sub_eq_add_neg (F x + (0 : R) * d.val), sub_eq_add_neg (F x)]
-      rw [add_assoc, add_comm ((0 : R) * d.val) (-(F 0)), ← add_assoc]
+      show F (x + d.val) - F 0 = (F x - F 0) + 0 * d.val
+      rw [hslope x d, sub_eq_add_neg (F x + 0 * d.val), sub_eq_add_neg (F x)]
+      rw [add_assoc, add_comm (0 * d.val) (-(F 0)), ← add_assoc]
   have heq := antideriv_unique hH zero_is_antideriv_zero
   intro x
   have : F x - F 0 = 0 := congrFun heq x
