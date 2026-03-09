@@ -10,9 +10,18 @@ Lean built-in and 1 optional extra), organized across 6 classes.
 
 **`propext`** — propositional extensionality: if two propositions are logically
 equivalent (`P ↔ Q`), then they are equal (`P = Q`). This is built into Lean 4
-and is the only Lean-level axiom our proofs use. Notably, we never use
-`Classical.choice` (which would give us LEM). The file `CheckAxioms.lean`
-verifies this for every theorem in the project.
+and is the only Lean-level axiom our proofs use.
+
+Without `propext`, Lean's type theory can distinguish between logically
+equivalent propositions — `P ↔ Q` would mean you can convert proofs back and
+forth, but `P` and `Q` would still be different types. With `propext`, you can
+use `rw` to substitute one for the other in goals and hypotheses. Most
+nontrivial Lean proofs rely on this.
+
+Importantly, `propext` is constructively valid — it does not imply LEM or
+classical reasoning. The axiom we *don't* use is `Classical.choice`, which
+would give us LEM and destroy the constructive character of SIA. The file
+`CheckAxioms.lean` verifies this for every theorem in the project.
 
 ---
 
@@ -100,6 +109,34 @@ One axiom:
 
 This replaces Bell's SIA₂ (the constancy principle). The two are
 interderivable — see the [comparison with Bell](appendix-comparison-with-bell.md).
+
+---
+
+## Two kinds of axiom
+
+The axioms above fall into two qualitatively different groups.
+
+**Axioms 1–15 are algebraic.** They constrain how existing operations relate
+to each other: addition is commutative, multiplication distributes over
+addition, order is preserved by adding the same thing to both sides. These are
+equational — they say what equations hold but don't assert the existence of
+anything new. Many familiar structures satisfy them (the rationals, the reals,
+various finite fields). You could think of them as rules of the game.
+
+**Axioms 16–17 are existential.** They assert that certain objects *exist*
+with specific properties. Kock-Lawvere says: for every function on Delta,
+there exists a unique slope. The integration axiom says: for every function on
+R, there exists a unique antiderivative. These are much stronger claims —
+they demand that the universe of functions is rich enough that slopes and
+antiderivatives always exist.
+
+The existential axioms are also where the distinctly SIA character lives.
+The algebraic axioms are compatible with classical mathematics. Kock-Lawvere
+is not — it is actively incompatible with LEM (as `not_lem_on_delta` proves).
+It can only hold in specific models (smooth toposes) where the logic is
+intuitionistic and functions are inherently smooth. The algebraic axioms set up
+the playing field; Kock-Lawvere and integration change the rules of the game
+itself.
 
 ---
 

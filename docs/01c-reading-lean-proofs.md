@@ -598,6 +598,42 @@ goal), and `exact`. Let's trace through it:
 On paper: "Add -b to both sides of a < b to get -b + a < 0. Add -a to both
 sides to get -b < -a."
 
+### Example 19: `le_neg_flip` — a `by` block whose goal comes from context
+
+```lean
+theorem le_neg_flip {a b : R} (h : a ≤ b) : -b ≤ -a :=
+  fun hna => h (by rw [← neg_neg a, ← neg_neg b]; exact lt_neg_flip hna)
+```
+
+Statement: if a ≤ b, then -b ≤ -a. (Negation flips weak inequality too.)
+
+This proof introduces an important pattern: a `by` block whose goal is
+determined by the function it's being passed to.
+
+Let's work through it:
+
+- The goal is `-b ≤ -a`, which unfolds to `(-a < -b) → False`.
+- `fun hna =>` assumes `hna : -a < -b` and we need to produce `False`.
+- `h` has type `a ≤ b`, which unfolds to `(b < a) → False`. So `h (...)` will
+  produce `False` if we give it a proof of `b < a`.
+
+Here's the key: in the expression `h (by ...)`, the `by` block's goal is
+`b < a` — because that's the argument type that `h` expects. Lean looks at
+`h`'s type (`(b < a) → False`), sees that `h` is being applied to the `by`
+block, and concludes the block must produce something of type `b < a`.
+
+Inside the `by` block:
+
+1. `rw [← neg_neg a, ← neg_neg b]` — rewrites the goal `b < a` to
+   `-(-b) < -(-a)` (since `neg_neg` says `-(-x) = x`, applied backwards).
+2. `exact lt_neg_flip hna` — the previous example showed that `lt_neg_flip`
+   flips `x < y` to `-y < -x`. Applied to `hna : -a < -b`, it gives
+   `-(-b) < -(-a)`, which matches the rewritten goal.
+
+The general pattern: when you see `f (by ...)`, the `by` block's goal is
+whatever type `f` expects as its argument. This comes up whenever you need to
+feed a constructed proof into a function or hypothesis.
+
 ---
 
 ## Cheat sheet: reading Lean at a glance
